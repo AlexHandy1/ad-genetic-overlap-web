@@ -7,6 +7,34 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Index page - consider separating for web pages
+
+## Objectives
+Provide a short summary of the 4 project objectives
+
+## Method
+Design a flow chart showing the four steps
+1. Select target proteins
+2. Protein PRS -> AD status
+3. AD PRS -> protein
+4. Bidirectional MR 
+  significant proteins -> AD
+  AD -> significant proteins
+
+## Results 
+
+## Exec Sum / TLDR
+
+2-3 key summary findings
+Table with summary results for each protein at each step of analysis
+
+## Step 1 - Select target proteins
+
+Outline proteins that were selected and present in a table
+- pull in data from google spreadsheets
+- display data in designed table
+
+Test version of code
 ```{r message=FALSE, warning=FALSE}
 #Load libraries
 library(googledrive)
@@ -14,4 +42,82 @@ library(googlesheets4)
 library(dplyr)
 library(knitr)
 library(kableExtra)
+
+#log in to google account
+drive_auth()
+sheets_auth(token = drive_token())
+
+#get Protein sheet
+proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1rk_tJAh_0SiXwOBlJlNYq25w0ZREu0I_QWWB_dwOAXo/edit#gid=0", sheet = "Protein_Test_Table")
+
+num_candidate_proteins <- nrow(proteins)
+
+num_target_proteins <- nrow(filter(proteins, In_Final_Shortlist == "Y"))
+
 ```
+
+`r num_candidate_proteins` candidate proteins were selected from the literature review.  
+`r num_target_proteins` target proteins were selected for PRS analysis.
+
+```{r message=FALSE, warning=FALSE}
+kable(proteins) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+```
+
+## Step 2 - Protein PRS -> AD status
+
+Summarise QC for base and target data e.g. variants removed
+- display final sample sizes in a table [programmatically reference sample sizes?]
+
+Estimate statistical power
+
+Display protein heritability results 
+- show example python code with ldsc 
+- chart comparing heritability for all proteins (scatter with variance) [load in summary results]
+- correlation matrix for all proteins [load in summary results]
+- short commentary
+
+Display PRS results
+- include snippet of PRSice command
+- bar chart (No APOE) comparing all proteins (individual samples and meta-analysis) [load in summary results]
+- commentary on results 
+- (appendix) detailed supplementary table [load in summary results]
+- (bonus) select drop down tables for individual charts on each protein 
+  -> distribution of PRS scores in sample
+  -> bar charts of threshold significance
+  
+  
+## Step 3 - AD PRS -> protein
+  
+Summarise QC for base and target data e.g. variants removed, proteins with ANM data available
+- display final sample sizes in a table [programmatically reference sample sizes?]
+
+Estimate statistical power
+
+Display PRS results
+- include snippet of PRSice command
+- bar chart (No APOE) comparing all proteins (individual samples and meta-analysis) [load in summary results]
+- commentary on results 
+- (appendix) detailed supplementary table [load in summary results]
+- (bonus) select drop down tables for individual charts on each protein 
+  -> distribution of PRS scores in sample
+  -> bar charts of threshold significance
+  
+## Step 4 - Bidirectional MR
+
+Summarise preparation 
+- Table of proteins analysed
+- Table of SNPs selected for each protein
+- Table of SNPs selected for AD
+
+(Optional) Estimate statistical power
+
+Display MR Results 
+- Include MR base code
+- summary chart of effect size and p-value for each protein (Protein -> AD, AD -> Protein)
+- summary table of results for each protein
+- comm
+- (bonus) select drop down tables for individual charts on each protein
+
+
+
+
