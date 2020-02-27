@@ -1,5 +1,5 @@
 ---
-title: "Thesis_Summary"
+title: "Thesis Summary"
 output: html_document
 ---
 
@@ -7,63 +7,60 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Index page - consider separating for web pages
+## Objective
 
-## Objectives
-Provide a short summary of the 4 project objectives
+Investigate the genetic association between blood plasma proteins and Alzheimer’s Disease (AD) to inform disease prediction and provide signals for functional research
+
+* Identify a shortlist of blood plasma proteins from existing literature that have been associated with AD or AD phenotypes
+* Create polygenic risk score (PRS) models for shortlist of proteins and test their association with AD in GERAD, ADNI and ANM consortium samples
+* Assess bi-directional genetic association between shortlist of proteins and AD by creating an AD PRS model and testing association with blood plasma protein levels in ANM participants
+* Test for causality by conducting Mendelian Randomization (MR) on selected SNPs from blood plasma proteins that are significant in one or both PRS analyses
 
 ## Method
-Design a flow chart showing the four steps
-1. Select target proteins
-2. Protein PRS -> AD status
-3. AD PRS -> protein
-4. Bidirectional MR 
-  significant proteins -> AD
-  AD -> significant proteins
+![PENDING ACTUAL GRAPHIC](smiley.jpg)
 
 ## Results 
 
-## Exec Sum / TLDR
+### Step 1 - Select target proteins
 
-2-3 key summary findings
-Table with summary results for each protein at each step of analysis
-
-## Step 1 - Select target proteins
-
-Outline proteins that were selected and present in a table
-- pull in data from google spreadsheets
-- display data in designed table
-
-Test version of code
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=FALSE}
 #Load libraries
 library(googledrive)
 library(googlesheets4)
 library(dplyr)
 library(knitr)
 library(kableExtra)
+# library(pander)
+# library(xtable)
 
 #log in to google account
 drive_auth()
 sheets_auth(token = drive_token())
 
 #get Protein sheet
-proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1rk_tJAh_0SiXwOBlJlNYq25w0ZREu0I_QWWB_dwOAXo/edit#gid=0", sheet = "Protein_Test_Table")
+candidate_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1J6bPGIw7irreVpgG-cuY-L6nidN6nUVle29XyhE_TZ8/edit#gid=1736283616", sheet = "Table1_Target_Proteins_For_Results")
 
-num_candidate_proteins <- nrow(proteins)
-
-num_target_proteins <- nrow(filter(proteins, In_Final_Shortlist == "Y"))
+target_proteins <- filter(candidate_proteins, In_Final_Shortlist == "Y")
+target_proteins <- target_proteins[, 0:4]
+#create table and variable for papers reviewed
+#num_papers_reviewed <- nrow(literature_review)
+num_candidate_proteins <- nrow(candidate_proteins)
+num_target_proteins <- nrow(target_proteins)
 
 ```
 
-`r num_candidate_proteins` candidate proteins were selected from the literature review.  
-`r num_target_proteins` target proteins were selected for PRS analysis.
+`r num_candidate_proteins` candidate proteins were identified from a literature review of 33 papers.  
+Proteins were marked as candidates if significantly associated with an AD related phenotype in an independent discovery study (univariate or multivariate) or if previously replicated in 3 or more studies in Kiddle et al's comprehensive 2014 review.
+ 
+`r num_target_proteins` proteins with GWAS data from Sun et al were selected for further analysis (see Table 1 below).
 
-```{r message=FALSE, warning=FALSE}
-kable(proteins) %>% kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+####Table 1: Target proteins for further analysis
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+#Present table of proteins for analysis
+kable(target_proteins) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
 ```
 
-## Step 2 - Protein PRS -> AD status
+### Step 2 - Protein PRS -> AD status
 
 Summarise QC for base and target data e.g. variants removed
 - display final sample sizes in a table [programmatically reference sample sizes?]
@@ -86,7 +83,7 @@ Display PRS results
   -> bar charts of threshold significance
   
   
-## Step 3 - AD PRS -> protein
+### Step 3 - AD PRS -> protein
   
 Summarise QC for base and target data e.g. variants removed, proteins with ANM data available
 - display final sample sizes in a table [programmatically reference sample sizes?]
@@ -102,7 +99,7 @@ Display PRS results
   -> distribution of PRS scores in sample
   -> bar charts of threshold significance
   
-## Step 4 - Bidirectional MR
+### Step 4 - Bidirectional MR
 
 Summarise preparation 
 - Table of proteins analysed
