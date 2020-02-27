@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 Investigate the genetic association between blood plasma proteins and Alzheimer’s Disease (AD) to inform disease prediction and provide signals for functional research
 
 * Identify a shortlist of blood plasma proteins from existing literature that have been associated with AD or AD phenotypes
-* Create polygenic risk score (PRS) models for shortlist of proteins and test their association with AD in GERAD, ADNI and ANM consortium samples
+* Create polygenic risk score (PRS) models for shortlist of proteins and test their association with AD in GERAD, ADNI and ANM samples
 * Assess bi-directional genetic association between shortlist of proteins and AD by creating an AD PRS model and testing association with blood plasma protein levels in ANM participants
 * Test for causality by conducting Mendelian Randomization (MR) on selected SNPs from blood plasma proteins that are significant in one or both PRS analyses
 
@@ -29,16 +29,13 @@ library(googledrive)
 library(googlesheets4)
 library(dplyr)
 library(knitr)
-library(kableExtra)
-# library(pander)
-# library(xtable)
 
 #log in to google account
 drive_auth()
 sheets_auth(token = drive_token())
 
-#get Protein sheet
-candidate_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1J6bPGIw7irreVpgG-cuY-L6nidN6nUVle29XyhE_TZ8/edit#gid=1736283616", sheet = "Table1_Target_Proteins_For_Results")
+#get protein summary info from google sheet
+candidate_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1J6bPGIw7irreVpgG-cuY-L6nidN6nUVle29XyhE_TZ8/edit#gid=1736283616", sheet = "Table1_Step1_Target_Proteins_For_Results")
 
 target_proteins <- filter(candidate_proteins, In_Final_Shortlist == "Y")
 target_proteins <- target_proteins[, 0:4]
@@ -52,26 +49,85 @@ num_target_proteins <- nrow(target_proteins)
 `r num_candidate_proteins` candidate proteins were identified from a literature review of 33 papers.  
 Proteins were marked as candidates if significantly associated with an AD related phenotype in an independent discovery study (univariate or multivariate) or if previously replicated in 3 or more studies in Kiddle et al's comprehensive 2014 review.
  
-`r num_target_proteins` proteins with GWAS data from Sun et al were selected for further analysis (see Table 1 below).
-
-####Table 1: Target proteins for further analysis
+`r num_target_proteins` proteins with GWAS data from Sun et al were selected for further analysis.
+  
+  
+  
+#####Figure 1: Target proteins for further analysis
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 #Present table of proteins for analysis
+library(kableExtra)
 kable(target_proteins) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
 ```
-
+  
+  
+  
 ### Step 2 - Protein PRS -> AD status
 
-Summarise QC for base and target data e.g. variants removed
-- display final sample sizes in a table [programmatically reference sample sizes?]
+```{r message=FALSE, warning=FALSE, include=FALSE}
+#Get google sheet with sample data
+target_sample_summary <- read_sheet("https://docs.google.com/spreadsheets/d/1JwJrrme5_OUVt4GRcbNJ71m2rK7KR-L6HF-gHeKNiK0/edit#gid=0", sheet = "Table2_Step2_Target_Sample")
 
-Estimate statistical power
+protein_base_sample_size <- "3,301"
+AD_target_sample_size <- target_sample_summary[3,5]
+final_PRS_SNP_num <- "5,210,103"
+```
 
-Display protein heritability results 
-- show example python code with ldsc 
-- chart comparing heritability for all proteins (scatter with variance) [load in summary results]
-- correlation matrix for all proteins [load in summary results]
-- short commentary
+#####Data Preparation
+
+Summary GWAS statistics for the `r num_target_proteins` target proteins were downloaded from the repository provided by the [Cambridge Cardiovascular Epidemiology Unit](http://www.phpc.cam.ac.uk/ceu/proteins/) based on `r protein_base_sample_size` healthy individuals *('Base data')*.  
+  
+Removed **[X]** bi-allelic and duplicate SNPs resulting in **[X]** SNPs for analysis.  
+
+Raw genotype data from GERAD, ADNI and ANM for `r AD_target_sample_size` individuals accessed via KCL Rosalind High Performance Computing cluster *('Target data')*.  
+
+Consistent QC applied [REQUIRES VALIDATION]  
+Samples: European ancestry, non-relatives, no other dementia or mild cognitive impairment, call rate > 98%   
+SNPs: MAF >0.01, call rate > 98%, HWE p<10^-5, imputed with INFO quality score >0.7  
+  
+  
+Only SNPs genotyped in all three Target data samples were selected from the Base data SNPs resulting in `r final_PRS_SNP_num` SNPs for consideration in the PRS model.  
+  
+  
+#####Figure 2: Target sample summary
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+names(target_sample_summary)[1] <- ""
+kable(target_sample_summary) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+#Get google sheet with heritability data
+protein_h2 <- read_sheet("https://docs.google.com/spreadsheets/d/1D8TagzAdtFOX-k5okLfKbmEcmdBpxyH0QkBfqFw_Mqo/edit#gid=165014093", sheet = "heritabilityCheckResults")
+
+average_mean_chi_squared <- mean(protein_h2$Mean_Chi_.2)
+average_se <- mean(protein_h2$h2_se)
+```
+
+#####Protein Heritability
+
+Observed protein heritability (h2) was estimated using linkage disequilibrium score regression (LDSR).  
+Average mean chi squared was low at `r average_mean_chi_squared`.  
+Results treated as indicative given average SE of `r average_se` and known challenges of applying LDSR to samples <5,000.  
+
+#####Figure 3: Protein Heritability Estimates
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(ggplot2)
+h2_data <- protein_h2 %>% select("Protein", "h2_no_se", "h2_se")
+names(h2_data)[2] <- "h2"
+
+ggplot(data = h2_data) + geom_pointrange(mapping = aes(x=Protein, y=h2, ymin=h2-h2_se, ymax=h2+h2_se)) + geom_hline(yintercept=1, linetype="dashed", color = "red") + geom_hline(yintercept=0, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
+
+
+```
+
+
+
+#####Figure 4: Protein Genetic Correlation Matrix
+
+Genetic Correlation matrix for all proteins [load in summary results]
+
+
 
 Display PRS results
 - include snippet of PRSice command
@@ -88,7 +144,7 @@ Display PRS results
 Summarise QC for base and target data e.g. variants removed, proteins with ANM data available
 - display final sample sizes in a table [programmatically reference sample sizes?]
 
-Estimate statistical power
+(Optional) Estimate statistical power
 
 Display PRS results
 - include snippet of PRSice command
