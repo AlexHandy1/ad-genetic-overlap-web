@@ -121,19 +121,82 @@ ggplot(data = h2_data) + geom_pointrange(mapping = aes(x=Protein, y=h2, ymin=h2-
 
 ```
 
-
+Genetic correlation (rg) between proteins was also estimated using LDSR.  
+No proteins had an rg of over 0.99 at a p-value less than 0.05.  
+[X]% results were NA. [Explain NA in context of LDSR].   
 
 #####Figure 4: Protein Genetic Correlation Matrix
+  
 
-Genetic Correlation matrix for all proteins [load in summary results]
+#####Protein PRS Models    
+    
+PRS models built for each of the `r num_target_proteins` target proteins at 10 pre-defined p-value thresholds 5e-08 | 1e-05 | 1e-04 | 0.0001 | 0.001 | 0.01 | 0.05 | 0.1 | 0.2 | 0.5 | 1.  
+Models applied independently to the three raw genotype samples with and without SNPs from the APOE region and meta-analysed.   
+  
+```
+#PRSice command to generate independent PRS models
+
+Rscript /mnt/lustre/groups/proitsi/Jodie/prs/Programmes/PRSice.R \
+      --dir /mnt/lustre/groups/proitsi/Alex/PRS_Outputs_All_Covariates \
+      --prsice /mnt/lustre/groups/proitsi/Jodie/prs/Programmes/PRSice_linux \
+      --base $PROTEIN_PATH \
+      --target $TARGET_FILE \
+      --stat BETA \
+      --score std \
+      --binary-target T \
+      --prevalence 0.07 \
+      --cov-file $TARGET_COVARIATE_FILE \
+      --cov-col PC1,PC2,PC3,PC4,PC5,PC6,PC7,AGE,SEX \
+      --bar-levels 5e-8,5e-5,5e-4,0.001,0.01,0.05,0.1,0.2,0.5,1 \
+      --fastscore \
+      --out /mnt/lustre/groups/proitsi/Alex/PRS_Outputs_All_Covariates/$OUTPUT
+      
+#Example code for meta-analysis
+for (protein in proteins){ 
+  print("Select data from each of the 10 thresholds")
+    test1<-prsResults %>% filter(Protein == protein, Threshold == 5e-08)
+    ...
+    test10<-prsResults %>% filter(Protein == protein, Threshold == 1)
+     
+  print("Run meta analysis on each threshold")
+    if(exists("test1")) test1.reml<-rma(yi=Coefficient, sei=Standard.Error, method="REML", data=test1)
+    ...
+    if(exists("test10")) test10.reml<-rma(yi=Coefficient, sei=Standard.Error, method="REML", data=test10)
+
+```
+  
+    
+Commentary on results    
+  
+  
+#####Figure 5: Protein PRS Associations with AD
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+
+prot_prs_meta <- read_sheet("https://docs.google.com/spreadsheets/d/1mNLTBwvKA17XF69qJw2JqS3upuKkAgWh2pXSDv3m1Yk/edit#gid=885908508", sheet = "prsMetaAnalysisResults_NO_APOE")
+
+#get p-value threshold with lowest p-value for each protein in meta-analysis
+prot_prs_meta_min_p <- prot_prs_meta %>% group_by(Protein) %>% filter(p == min(p))
+
+ggplot(data = prot_prs_meta_min_p) + geom_col(mapping = aes(x=Protein, y=P_MinusLog10)) + geom_hline(yintercept=1.3, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
+
+#get p-values for proteins for each of the individual samples
+prot_prs_ind <- read_sheet("https://docs.google.com/spreadsheets/d/1x__FaOVEGs_aZol1Y65vlShIGiSWTmQvjf7Q0lpd4nc/edit#gid=1059518305", sheet = "prsResults_1_NO_APOE")
+
+```
 
 
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+#get p-values for proteins for each of the individual samples
+prot_prs_ind <- read_sheet("https://docs.google.com/spreadsheets/d/1x__FaOVEGs_aZol1Y65vlShIGiSWTmQvjf7Q0lpd4nc/edit#gid=1059518305", sheet = "prsResults_1_NO_APOE")
 
-Display PRS results
-- include snippet of PRSice command
-- bar chart (No APOE) comparing all proteins (individual samples and meta-analysis) [load in summary results]
-- commentary on results 
-- (appendix) detailed supplementary table [load in summary results]
+prot_prs_ind <- prot_prs_ind %>% mutate(PrtSam = paste(Protein, Sample))
+
+#Sort labels
+ggplot(data = prot_prs_ind) + geom_col(mapping = aes(x=PrtSam, y=P_MinusLog10)) + geom_hline(yintercept=1.3, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
+
+```
+
 - (bonus) select drop down tables for individual charts on each protein 
   -> distribution of PRS scores in sample
   -> bar charts of threshold significance
