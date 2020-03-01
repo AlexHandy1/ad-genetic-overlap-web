@@ -39,6 +39,8 @@ candidate_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1J6bPGI
 
 target_proteins <- filter(candidate_proteins, In_Final_Shortlist == "Y")
 target_proteins <- target_proteins[, 0:4]
+target_proteins <- target_proteins %>% mutate("Protein Short Code" = gsub("\\..*","",SOMAmerID)) %>% select(1:2, `Protein Short Code`, everything())
+
 #create table and variable for papers reviewed
 #num_papers_reviewed <- nrow(literature_review)
 num_candidate_proteins <- nrow(candidate_proteins)
@@ -113,8 +115,9 @@ Results treated as indicative given average SE of `r average_se` and known chall
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 library(ggplot2)
-h2_data <- protein_h2 %>% select("Protein", "h2_no_se", "h2_se")
-names(h2_data)[2] <- "h2"
+protein_h2 <- protein_h2 %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything())
+h2_data <- protein_h2 %>% select("Protein Short Code", "h2_no_se", "h2_se")
+names(h2_data) <- c("Protein", "h2", "h2_se")
 
 ggplot(data = h2_data) + geom_pointrange(mapping = aes(x=Protein, y=h2, ymin=h2-h2_se, ymax=h2+h2_se)) + geom_hline(yintercept=1, linetype="dashed", color = "red") + geom_hline(yintercept=0, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
 
@@ -176,12 +179,11 @@ Commentary on results
 prot_prs_meta <- read_sheet("https://docs.google.com/spreadsheets/d/1mNLTBwvKA17XF69qJw2JqS3upuKkAgWh2pXSDv3m1Yk/edit#gid=885908508", sheet = "prsMetaAnalysisResults_NO_APOE")
 
 #get p-value threshold with lowest p-value for each protein in meta-analysis
+prot_prs_meta <- prot_prs_meta %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
+names(prot_prs_meta)[1] <- "Protein"
 prot_prs_meta_min_p <- prot_prs_meta %>% group_by(Protein) %>% filter(p == min(p))
 
-ggplot(data = prot_prs_meta_min_p) + geom_col(mapping = aes(x=Protein, y=P_MinusLog10)) + geom_hline(yintercept=1.3, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
-
-#get p-values for proteins for each of the individual samples
-prot_prs_ind <- read_sheet("https://docs.google.com/spreadsheets/d/1x__FaOVEGs_aZol1Y65vlShIGiSWTmQvjf7Q0lpd4nc/edit#gid=1059518305", sheet = "prsResults_1_NO_APOE")
+ggplot(data = prot_prs_meta_min_p) + geom_col(mapping = aes(x=Protein, y=P_MinusLog10)) + geom_hline(yintercept=1.3, linetype="dashed", color = "red") + expand_limits(y = c(0, 2.5)) + theme(axis.text.x=element_text(angle = -90, hjust = 0)) + geom_text(aes(x=Protein, y=P_MinusLog10,label=Threshold, vjust=-0.5))
 
 ```
 
@@ -190,10 +192,13 @@ prot_prs_ind <- read_sheet("https://docs.google.com/spreadsheets/d/1x__FaOVEGs_a
 #get p-values for proteins for each of the individual samples
 prot_prs_ind <- read_sheet("https://docs.google.com/spreadsheets/d/1x__FaOVEGs_aZol1Y65vlShIGiSWTmQvjf7Q0lpd4nc/edit#gid=1059518305", sheet = "prsResults_1_NO_APOE")
 
-prot_prs_ind <- prot_prs_ind %>% mutate(PrtSam = paste(Protein, Sample))
+prot_prs_ind <- prot_prs_ind %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
+names(prot_prs_ind)[1] <- "Protein"
+
+prot_prs_ind <- prot_prs_ind %>% mutate("Protein_Sample" = paste(Protein, Sample))
 
 #Sort labels
-ggplot(data = prot_prs_ind) + geom_col(mapping = aes(x=PrtSam, y=P_MinusLog10)) + geom_hline(yintercept=1.3, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
+ggplot(data = prot_prs_ind) + geom_col(mapping = aes(x=Protein_Sample, y=P_MinusLog10, fill=Sample)) + geom_hline(yintercept=1.3, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
 
 ```
 
