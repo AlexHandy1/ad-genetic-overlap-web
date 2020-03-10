@@ -16,7 +16,7 @@ Investigate the genetic association between blood plasma proteins and Alzheimerâ
 * Assess bi-directional genetic association between shortlist of proteins and AD by creating an AD PRS model and testing association with blood plasma protein levels in ANM participants
 * Test for causality by conducting Mendelian Randomization (MR) on selected SNPs from blood plasma proteins that are significant in one or both PRS analyses
 
-## Method
+## Graphical Abstract
 ![PENDING ACTUAL GRAPHIC](smiley.jpg)
 
 ## Results 
@@ -53,17 +53,14 @@ Proteins were marked as candidates if significantly associated with an AD relate
  
 `r num_target_proteins` proteins with GWAS data from Sun et al were selected for further analysis.
   
-  
-  
-#####Figure 1: Target proteins for further analysis
+######Figure 1: Target proteins for further analysis
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 #Present table of proteins for analysis
 library(kableExtra)
 kable(target_proteins) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
 ```
   
-  
-  
+            
 ### Step 2 - Protein PRS -> AD status
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
@@ -90,8 +87,7 @@ SNPs: MAF >0.01, call rate > 98%, HWE p<10^-5, imputed with INFO quality score >
   
 Only SNPs genotyped in all three Target data samples were selected from the Base data SNPs resulting in `r final_PRS_SNP_num` SNPs for consideration in the PRS model.  
   
-  
-#####Figure 2: Target sample summary
+######Figure 2: Target sample summary
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 names(target_sample_summary)[1] <- ""
 kable(target_sample_summary) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
@@ -104,14 +100,14 @@ protein_h2 <- read_sheet("https://docs.google.com/spreadsheets/d/1D8TagzAdtFOX-k
 average_mean_chi_squared <- mean(protein_h2$Mean_Chi_.2)
 average_se <- mean(protein_h2$h2_se)
 ```
-
+    
 #####Protein Heritability
 
 Observed protein heritability (h2) was estimated using linkage disequilibrium score regression (LDSR).  
 Average mean chi squared was low at `r average_mean_chi_squared`.  
 Results treated as indicative given average SE of `r average_se` and known challenges of applying LDSR to samples <5,000.  
-
-#####Figure 3: Protein Heritability Estimates
+  
+######Figure 3: Protein Heritability Estimates
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 library(ggplot2)
@@ -127,10 +123,9 @@ ggplot(data = h2_data) + geom_pointrange(mapping = aes(x=Protein, y=h2, ymin=h2-
 Genetic correlation (rg) between proteins was also estimated using LDSR.  
 No proteins had an rg of over 0.99 at a p-value less than 0.05.  
 [X]% results were NA. [Explain NA in context of LDSR].   
-
-#####Figure 4: Protein Genetic Correlation Matrix
   
-
+######Figure 4: Protein Genetic Correlation Matrix   
+  
 #####Protein PRS Models    
     
 PRS models built for each of the `r num_target_proteins` target proteins at 10 pre-defined p-value thresholds 5e-08 | 1e-05 | 1e-04 | 0.0001 | 0.001 | 0.01 | 0.05 | 0.1 | 0.2 | 0.5 | 1.  
@@ -167,12 +162,10 @@ for (protein in proteins){
     if(exists("test10")) test10.reml<-rma(yi=Coefficient, sei=Standard.Error, method="REML", data=test10)
 
 ```
-  
     
 Commentary on results    
   
-  
-#####Figure 5: Protein PRS Associations with AD
+######Figure 5: Protein PRS Associations with AD (Meta-analysed, No APOE SNPs)
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
@@ -183,10 +176,12 @@ prot_prs_meta <- prot_prs_meta %>% mutate("Protein Short Code" = gsub("\\..*",""
 names(prot_prs_meta)[1] <- "Protein"
 prot_prs_meta_min_p <- prot_prs_meta %>% group_by(Protein) %>% filter(p == min(p))
 
-ggplot(data = prot_prs_meta_min_p) + geom_col(mapping = aes(x=Protein, y=P_MinusLog10)) + geom_hline(yintercept=1.3, linetype="dashed", color = "red") + expand_limits(y = c(0, 2.5)) + theme(axis.text.x=element_text(angle = -90, hjust = 0)) + geom_text(aes(x=Protein, y=P_MinusLog10,label=Threshold, vjust=-0.5))
+
+ggplot(prot_prs_meta_min_p, aes(Protein, P_MinusLog10, label=Threshold, fill=Significant)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="blue", "N"="gray" ), guide = FALSE )
 
 ```
 
+######Figure 6: Protein PRS Associations with AD (Per sample, No APOE SNPs)
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 #get p-values for proteins for each of the individual samples
@@ -197,15 +192,9 @@ names(prot_prs_ind)[1] <- "Protein"
 
 prot_prs_ind <- prot_prs_ind %>% mutate("Protein_Sample" = paste(Protein, Sample))
 
-#Sort labels
-ggplot(data = prot_prs_ind) + geom_col(mapping = aes(x=Protein_Sample, y=P_MinusLog10, fill=Sample)) + geom_hline(yintercept=1.3, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
+ggplot(prot_prs_ind, aes(Protein, P_MinusLog10, fill=Sample)) + geom_bar(stat = "identity", position=position_dodge()) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0)) + ylab("-log10 p-value") + xlab("Protein") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red"))))
 
 ```
-
-- (bonus) select drop down tables for individual charts on each protein 
-  -> distribution of PRS scores in sample
-  -> bar charts of threshold significance
-  
   
 ### Step 3 - AD PRS -> protein
   
@@ -218,10 +207,6 @@ Display PRS results
 - include snippet of PRSice command
 - bar chart (No APOE) comparing all proteins (individual samples and meta-analysis) [load in summary results]
 - commentary on results 
-- (appendix) detailed supplementary table [load in summary results]
-- (bonus) select drop down tables for individual charts on each protein 
-  -> distribution of PRS scores in sample
-  -> bar charts of threshold significance
   
 ### Step 4 - Bidirectional MR
 
@@ -229,8 +214,6 @@ Summarise preparation
 - Table of proteins analysed
 - Table of SNPs selected for each protein
 - Table of SNPs selected for AD
-
-(Optional) Estimate statistical power
 
 Display MR Results 
 - Include MR base code
