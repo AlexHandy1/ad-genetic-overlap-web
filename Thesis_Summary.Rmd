@@ -53,7 +53,7 @@ Proteins were marked as candidates if significantly associated with an AD relate
  
 `r num_target_proteins` proteins with GWAS data from Sun et al were selected for further analysis.
   
-######Figure 1: Target proteins for further analysis
+#####Figure 1: Target proteins for further analysis
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 #Present table of proteins for analysis
 library(kableExtra)
@@ -87,7 +87,7 @@ SNPs: MAF >0.01, call rate > 98%, HWE p<10^-5, imputed with INFO quality score >
   
 Only SNPs genotyped in all three Target data samples were selected from the Base data SNPs resulting in `r final_PRS_SNP_num` SNPs for consideration in the PRS model.  
   
-######Figure 2: Target sample summary
+#####Figure 2: Target sample summary
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 names(target_sample_summary)[1] <- ""
 kable(target_sample_summary) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
@@ -107,7 +107,7 @@ Observed protein heritability (h2) was estimated using linkage disequilibrium sc
 Average mean chi squared was low at `r average_mean_chi_squared`.  
 Results treated as indicative given average SE of `r average_se` and known challenges of applying LDSR to samples <5,000.  
   
-######Figure 3: Protein Heritability Estimates
+#####Figure 3: Protein Heritability Estimates
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 library(ggplot2)
@@ -122,7 +122,7 @@ ggplot(data = h2_data) + geom_pointrange(mapping = aes(x=Protein, y=h2, ymin=h2-
 
 Genetic correlation (rg) between proteins was also estimated using LDSR.  
 No proteins had an rg of over 0.99 at a p-value less than 0.05.  
-[X]% results were NA. [Explain NA in context of LDSR].   
+*[X]*% results were NA. *[Explain NA in context of LDSR]*.   
   
 ######Figure 4: Protein Genetic Correlation Matrix   
   
@@ -163,9 +163,21 @@ for (protein in proteins){
 
 ```
     
-Commentary on results    
-  
-######Figure 5: Protein PRS Associations with AD (Meta-analysed, No APOE SNPs)
+6 proteins were nominally significant (p = <0.05) in the with APOE sample after meta-analysis (APOE, Serum amyloid P component, Complement component C6, Inter-alpha-trypsin inhibitor heavy chain H1, Prostate-specific antigen, Plasma protease C1 inhibitor).
+
+
+When *[X]* SNPs in the APOE region were removed from the base and target data to control for the known association with APOE, 6 proteins were nominally significant with Insulin-like growth factor-binding protein 2 replacing APOE:  
+
+1. Complement component C6 (C6.4127.75.1) - p = 0.0242
+2. Plasma protease C1 inhibitor (SERPING1.4479.14.2) - p = 0.0256
+3. Inter-alpha-trypsin inhibitor heavy chain H1 (ITIH1.7955.195.3) - p = 0.0272
+4. Serum amyloid P component (APCS.2474.54.5) - p = 0.0283
+5. Prostate-specific antigen (KLK3.8468.19.3) - p = 0.0398
+6. Insulin-like growth factor-binding protein 2 (IGFBP2.2570.72.5) - p = 0.0435
+
+Variance explained (R^2) was low for each of the 6 proteins (mean R^2 = 0.0007) *[TO BE VERIFIED]*.
+
+#####Figure 5: Protein PRS Associations with AD (Meta-analysed, No APOE SNPs)
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
@@ -181,7 +193,7 @@ ggplot(prot_prs_meta_min_p, aes(Protein, P_MinusLog10, label=Threshold, fill=Sig
 
 ```
 
-######Figure 6: Protein PRS Associations with AD (Per sample, No APOE SNPs)
+#####Figure 6: Protein PRS Associations with AD (Per sample, No APOE SNPs)
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 #get p-values for proteins for each of the individual samples
