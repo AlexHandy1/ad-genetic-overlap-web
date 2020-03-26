@@ -35,7 +35,7 @@ drive_auth()
 sheets_auth(token = drive_token())
 
 #get protein summary info from google sheet
-candidate_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1J6bPGIw7irreVpgG-cuY-L6nidN6nUVle29XyhE_TZ8/edit#gid=1736283616", sheet = "Table1_Step1_Target_Proteins_For_Results")
+candidate_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step1_Target_Proteins")
 
 target_proteins <- filter(candidate_proteins, In_Final_Shortlist == "Y")
 target_proteins <- target_proteins[, 0:4]
@@ -66,7 +66,7 @@ kable(target_proteins) %>% kable_styling(bootstrap_options = "condensed", full_w
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 #Get google sheet with sample data
-step2_target_sample_summary <- read_sheet("https://docs.google.com/spreadsheets/d/1JwJrrme5_OUVt4GRcbNJ71m2rK7KR-L6HF-gHeKNiK0/edit#gid=0", sheet = "Table2_Step2_Target_Sample")
+step2_target_sample_summary <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step2_Target_Sample")
 
 protein_base_sample_size <- "3,301"
 AD_target_sample_size <- step2_target_sample_summary[3,5]
@@ -96,7 +96,7 @@ kable(step2_target_sample_summary) %>% kable_styling(bootstrap_options = "conden
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 #Get google sheet with heritability data
-protein_h2 <- read_sheet("https://docs.google.com/spreadsheets/d/1D8TagzAdtFOX-k5okLfKbmEcmdBpxyH0QkBfqFw_Mqo/edit#gid=165014093", sheet = "heritabilityCheckResults")
+protein_h2 <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step2_Heritability_Check")
 
 average_mean_chi_squared <- mean(protein_h2$Mean_Chi_.2)
 average_se <- mean(protein_h2$h2_se)
@@ -169,22 +169,20 @@ for (protein in proteins){
     
 6 proteins were nominally significant (p = <0.05) in the with APOE sample after meta-analysis (APOE, Serum amyloid P component, Complement component C6, Inter-alpha-trypsin inhibitor heavy chain H1, Prostate-specific antigen, Plasma protease C1 inhibitor).
 
-When *[X]* SNPs in the APOE region were removed from the base and target data to control for the known association with APOE, 6 proteins were nominally significant with Insulin-like growth factor-binding protein 2 replacing APOE:  
+When *[X]* SNPs in the APOE region were removed from the base and target data to control for the known association with APOE, 6 proteins were nominally significant with Insulin-like growth factor-binding protein 2 replacing APOE. 
 
-1. Complement component C6 (C6.4127.75.1) - p = 0.0242
-2. Plasma protease C1 inhibitor (SERPING1.4479.14.2) - p = 0.0256
-3. Inter-alpha-trypsin inhibitor heavy chain H1 (ITIH1.7955.195.3) - p = 0.0272
-4. Serum amyloid P component (APCS.2474.54.5) - p = 0.0283
-5. Prostate-specific antigen (KLK3.8468.19.3) - p = 0.0398
-6. Insulin-like growth factor-binding protein 2 (IGFBP2.2570.72.5) - p = 0.0435
+#####Figure 5a: Proteins with Protein PRS significantly associated with AD
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+step2_sig_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step_2_PRS_Sig_Proteins")
+kable(step2_sig_proteins) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
+```
 
-Variance explained (R^2) was low for each of the 6 proteins (mean R^2 = 0.0007) *[TO BE VERIFIED]*.
 
-#####Figure 5: Protein PRS Associations with AD (Meta-analysed, No APOE SNPs)
+#####Figure 5b: Protein PRS Associations with AD (Meta-analysed, No APOE SNPs)
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, out.width='85%'}
 
-prot_prs_meta <- read_sheet("https://docs.google.com/spreadsheets/d/1mNLTBwvKA17XF69qJw2JqS3upuKkAgWh2pXSDv3m1Yk/edit#gid=885908508", sheet = "prsMetaAnalysisResults_NO_APOE")
+prot_prs_meta <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step2_PRS_Meta_Results_NO_APOE")
 
 #get p-value threshold with lowest p-value for each protein in meta-analysis
 prot_prs_meta <- prot_prs_meta %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
@@ -200,7 +198,7 @@ ggplot(prot_prs_meta_min_p, aes(Protein, P_MinusLog10, label=Threshold, fill=Sig
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, out.width='85%'}
 #get p-values for proteins for each of the individual samples
-prot_prs_ind <- read_sheet("https://docs.google.com/spreadsheets/d/1x__FaOVEGs_aZol1Y65vlShIGiSWTmQvjf7Q0lpd4nc/edit#gid=1059518305", sheet = "prsResults_1_NO_APOE")
+prot_prs_ind <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step2_PRS_Cohort_Results_NO_APOE")
 
 prot_prs_ind <- prot_prs_ind %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
 names(prot_prs_ind)[1] <- "Protein"
@@ -215,7 +213,7 @@ ggplot(prot_prs_ind, aes(Protein, P_MinusLog10, fill=Sample)) + geom_bar(stat = 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 #get AD PRS results
-ad_prs_res <- read_sheet("https://docs.google.com/spreadsheets/d/11yYffvN7Y_bsuDBK-7N11WirOFZgeKxlsIW8lhLDY9s/edit#gid=1991416772", sheet = "ADPRSresults_NOAPOE")
+ad_prs_res <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step3_PRS_Results_NO_APOE")
 
 ad_prs_res <- ad_prs_res %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
 names(ad_prs_res)[1] <- "Protein"
@@ -232,13 +230,21 @@ For pancreatic prohormone, amyloid-beta A4 precursor protein-binding family B me
 #####Figure 7: ANM target sample summary
 **[TABLE TO BE COMPLETED]**
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
-step3_target_sample_summary <- read_sheet("https://docs.google.com/spreadsheets/d/1JwJrrme5_OUVt4GRcbNJ71m2rK7KR-L6HF-gHeKNiK0/edit#gid=0", sheet = "Step3_Target_Sample")
+step3_target_sample_summary <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step3_Target_Sample")
 names(step3_target_sample_summary)[1] <- ""
 kable(step3_target_sample_summary) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
 ```
 
 AD PRS models were tested with and without SNPs from the APOE region at 10 pre-defined p-value thresholds 5e-08 | 1e-05 | 1e-04 | 0.0001 | 0.001 | 0.01 | 0.05 | 0.1 | 0.2 | 0.5 | 1.    
-No covariates included as protein phenotype created by taking residuals from regression of protein levels with age, gender and centre. **[TO BE CONFIRMED AS INCLUDED COVARIATE FOR CASE STATUS]**  
+No covariates included as protein phenotype created by taking residuals from regression of protein levels with age, gender and centre.
+
+**ANALYSIS TO-DOS**  
+
++ Test for collinearity between AD PRS score and AD status in ANM and deciles analysis
++ Confirm covariates and run with and without case / control as covariates
++ Run AD and Protein PRS stratified by age
++ Run Protein PRS deciles association analysis with protein levels in ANM cohort (to check level of association with protein)
++ Run Protein PRS deciles association analysis with AD for significant proteins
 
 ```
 #PRSice command to generate AD PRS models
@@ -266,14 +272,15 @@ Rscript /mnt/lustre/groups/proitsi/Jodie/prs/Programmes/PRSice.R \
 
 2 proteins were nominally significant (p = <0.05) in the with APOE sample (APOE and Haptoglobin).
 
-When *[X]* SNPs in the APOE region were removed from the base and target data to control for the known association with APOE, 2 proteins were nominally significant with Interleukin-10 replacing APOE:  
+When *[X]* SNPs in the APOE region were removed from the base and target data to control for the known association with APOE, 2 proteins were nominally significant with Interleukin-10 replacing APOE. 
 
-1. Interleukin-10 (IL10.2773.50.2) - p = 0.0392
-2. Haptoglobin (HP.3054.3.2) - p = 0.0460
+#####Figure 8a: Proteins significantly associated with AD PRS
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+step3_sig_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step_3_PRS_Sig_Proteins")
+kable(step3_sig_proteins) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
+```
 
-Variance explained (R^2) was low for each protein (IL10.2773.50.2 R^2 = 0.0104, HP.3054.3.2 R^2 = 0.00974) **[TO BE VERIFIED]**.  
-
-#####Figure 8: AD PRS Associations with blood plasma protein levels (No APOE SNPs)
+#####Figure 8b: AD PRS Associations with blood plasma protein levels (No APOE SNPs)
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, out.width='85%'}
 
@@ -286,17 +293,33 @@ ggplot(ad_prs_res, aes(Protein, P_MinusLog10, label=Threshold, fill=Significant)
   
 ### Step 4 - Bidirectional MR
 
-Summarise preparation 
-- Table of proteins analysed
-- Table of SNPs selected for each protein
-- Table of SNPs selected for AD
+Proteins that were significant in one or both PRS were considered for Mendelian Randomisation (MR).   
+This resulted in 8 proteins, excluding APOE.
+4 proteins had SNPs that passed criteria for use as genetic instruments:  
 
-Display MR Results 
-- Include MR base code
-- summary chart of effect size and p-value for each protein (Protein -> AD, AD -> Protein)
-- summary table of results for each protein
-- comm
-- (bonus) select drop down tables for individual charts on each protein
++ Genome wide significant cis-eQTLs associated with gene encoding target protein
++ Not associated with confounders
++ Not associated with outcome (except through exposure)
++ Not in LD with other instrumental variables  
+
+**ANALYSIS TO-DOS**  
+
++ Review constraints to include more SNPs for existing 4 proteins and other 4  
++ Apply statistical biological screening for AD and protein SNP instruments
+
+#####Figure 9: Proteins for MR
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+step4_mr_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step_4_MR_Proteins")
+kable(step4_mr_proteins) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
+```
+
+ 
+Proteins were analysed individually as an exposure with AD as the outcome. AD was then used as an exposure with each protein as the outcome to test for reverse causality.  
+Inverse variance weighted MR and sensitivity analysis (e.g. weighted median, weighted mode, MR Egger) was conducted using the R package [MR Base](https://mrcieu.github.io/TwoSampleMR/). 
+ 
+#####Figure 10: MR Results
+
+**[INSERT SHINY APP FOR MR RESULTS]**
 
 
 
