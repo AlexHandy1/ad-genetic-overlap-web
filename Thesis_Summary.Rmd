@@ -319,7 +319,8 @@ Inverse variance weighted MR and sensitivity analysis (e.g. weighted median, wei
  
 #####Figure 10: MR Results
 
-**[INSERT SHINY APP FOR MR RESULTS]**
+**[STILL EXPLORING BEST WAY TO EMBED SHINY APP - IFRAME NOT WORKING AND EMBED NOT INTERACTIVE]**
+[MR Results](https://alexhandy1.shinyapps.io/mr_results/)
 
 
 
