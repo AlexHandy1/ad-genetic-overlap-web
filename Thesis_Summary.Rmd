@@ -1,6 +1,7 @@
 ---
 title: "Thesis Summary"
 output: html_document
+runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -319,9 +320,61 @@ Inverse variance weighted MR and sensitivity analysis (e.g. weighted median, wei
  
 #####Figure 10: MR Results
 
-**[STILL EXPLORING BEST WAY TO EMBED SHINY APP - IFRAME NOT WORKING AND EMBED NOT INTERACTIVE]**
-[MR Results](https://alexhandy1.shinyapps.io/mr_results/)
+<!-- For knitting and publishing to web, use iframe with "runtime: shiny"" removed to allow "knit" and creation of .html file and eval=FALSE-->
+<!-- <iframe src="https://alexhandy1.shinyapps.io/mr_results/" width=1000 height=1000" frameBorder="0"></iframe> -->
 
+```{r, echo=FALSE, eval=TRUE}
+shinyApp(
 
+  ui <- fluidPage(
+     
+     titlePanel(""),
+    
+     sidebarLayout(
+        sidebarPanel(
+          selectInput("exposure", strong("Exposure"), 
+                      choices = c("HP","ITIH1","C1","SAP", "AD"), selected = "HP"),
+          selectInput("outcome", strong("Outcome"), 
+                      choices = c("HP","ITIH1","C1","SAP", "AD"), selected = "AD")
+        ),
+        
+        mainPanel(
+          imageOutput("ScatterPlot"),
+          imageOutput("ForestPlot")
+        )
+     )
+  ),
+  
+  server <- function(input, output) {
+     output$ScatterPlot <- renderImage({
+       
+       if(input$exposure == "AD" && input$outcome != "AD") {
+         imagePath1 <- paste("www/AD_Prt_",input$outcome,"_1.png", sep="")
+       } else if(input$outcome == "AD" && input$exposure != "AD") {
+         imagePath1 <- paste("www/Prt_AD_",input$exposure,"_1.png", sep="")
+       } else {
+         imagePath1 <- "www/404.png"
+       }
+  
+       list(src = imagePath1, width='85%', height='85%')
+     }, deleteFile = FALSE)
+     
+     output$ForestPlot <- renderImage({
+       
+       if(input$exposure == "AD" && input$outcome != "AD") {
+         imagePath2 <- paste("www/AD_Prt_",input$outcome,"_2.png", sep="")
+       } else if(input$outcome == "AD" && input$exposure != "AD") {
+         imagePath2 <- paste("www/Prt_AD_",input$exposure,"_2.png", sep="")
+       } else {
+         imagePath2 <- "www/404.png"
+       }
+       
+       list(src = imagePath2, width='100%', height='100%')
+     }, deleteFile = FALSE)
+  },
+
+  options = list(height = 500)
+)
+```
 
 
