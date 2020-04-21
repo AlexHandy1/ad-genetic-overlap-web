@@ -239,14 +239,6 @@ kable(step3_target_sample_summary) %>% kable_styling(bootstrap_options = "conden
 AD PRS models were tested with and without SNPs from the APOE region at 10 pre-defined p-value thresholds 5e-08 | 1e-05 | 1e-04 | 0.0001 | 0.001 | 0.01 | 0.05 | 0.1 | 0.2 | 0.5 | 1.    
 No covariates included as protein phenotype created by taking residuals from regression of protein levels with age, gender and centre.
 
-**ANALYSIS TO-DOS**  
-
-+ Test for collinearity between AD PRS score and AD status in ANM and deciles analysis
-+ Confirm covariates and run with and without case / control as covariates
-+ Run AD and Protein PRS stratified by age
-+ Run Protein PRS deciles association analysis with protein levels in ANM cohort (to check level of association with protein)
-+ Run Protein PRS deciles association analysis with AD for significant proteins
-
 ```
 #PRSice command to generate AD PRS models
 
@@ -298,15 +290,10 @@ Proteins that were significant in one or both PRS were considered for Mendelian 
 This resulted in 8 proteins, excluding APOE.
 4 proteins had SNPs that passed criteria for use as genetic instruments:  
 
-+ Genome wide significant cis-eQTLs associated with gene encoding target protein
++ Genome wide significant cis-pQTLs associated with gene encoding target protein
 + Not associated with confounders
 + Not associated with outcome (except through exposure)
 + Not in LD with other instrumental variables  
-
-**ANALYSIS TO-DOS**  
-
-+ Review constraints to include more SNPs for existing 4 proteins and other 4  
-+ Apply statistical biological screening for AD and protein SNP instruments
 
 #####Figure 9: Proteins for MR
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
@@ -340,7 +327,8 @@ shinyApp(
         
         mainPanel(
           imageOutput("ScatterPlot"),
-          imageOutput("ForestPlot")
+          imageOutput("ForestPlot"),
+          tableOutput("table")
         )
      )
   ),
@@ -371,6 +359,35 @@ shinyApp(
        
        list(src = imagePath2, width='100%', height='100%')
      }, deleteFile = FALSE)
+     
+     AD_Prt_res <- read.csv("AD_Prt_Results.csv")
+   Prt_AD_res <- read.csv("Prt_AD_Results.csv")
+   
+   output$table <- renderTable({
+     
+     tableInput <- if(input$exposure == "AD" && input$outcome != "AD") {
+
+                    switch(input$outcome,
+                           "HP" = AD_Prt_res %>% filter(id.outcome == "prot-a-1369") %>% select(6:10),
+                           "ITIH1" = AD_Prt_res %>% filter(id.outcome == "prot-a-1586") %>% select(6:10),
+                           "C1" = AD_Prt_res %>% filter(id.outcome == "prot-a-2701") %>% select(6:10),
+                           "SAP" = AD_Prt_res %>% filter(id.outcome == "prot-a-120") %>% select(6:10)
+                           )
+
+      } else if(input$outcome == "AD" && input$exposure != "AD") {
+
+                    switch(input$exposure,
+                             "HP" = Prt_AD_res %>% filter(id.exposure == "prot-a-1369") %>% select(6:10),
+                             "ITIH1" = Prt_AD_res %>% filter(id.exposure == "prot-a-1586") %>% select(6:10),
+                             "C1" = Prt_AD_res %>% filter(id.exposure == "prot-a-2701") %>% select(6:10),
+                             "SAP" = Prt_AD_res %>% filter(id.exposure == "prot-a-120") %>% select(6:10)
+        )
+
+      } else {
+              NULL
+     }
+     
+   })
   },
 
   options = list(height = 500)
