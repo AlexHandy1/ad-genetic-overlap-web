@@ -1,7 +1,6 @@
 ---
 title: "Thesis Summary"
 output: html_document
-runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
@@ -287,30 +286,96 @@ ggplot(ad_prs_res, aes(Protein, P_MinusLog10, label=Threshold, fill=Significant)
 ### Step 4 - Bidirectional MR
 
 Proteins that were significant in one or both PRS were considered for Mendelian Randomisation (MR).   
-This resulted in 8 proteins, excluding APOE.
-4 proteins had SNPs that passed criteria for use as genetic instruments:  
+This resulted in 9 proteins, including APOE.
 
-+ Genome wide significant cis-pQTLs associated with gene encoding target protein
-+ Not associated with confounders
-+ Not associated with outcome (except through exposure)
-+ Not in LD with other instrumental variables  
+Genetic instruments for each protein were selected and analysed in three tiers of descending conservatism.  
++ Tier 1 - sentinal variant cis-only pQTLs as defined by Sun et al (p < 1.5e11)  
++ Tier 2 - SNPs with p < 5e08 clumped based on LD r2 <0.001 within a 250kb window (to provide n>1 instruments)  
++ Tier 3 - SNPs with p < 5e06 clumped based on LD r2 <0.001 within a 250kb window (to provide instruments for all 9 proteins and account for polygenic architecture)  
+
+Genetic instruments were screened for:   
++ Association with other blood plasma proteins in Sun et al (horizontal pleiotropy)  
++ Association with other potential risk exposures (horizontal pleiotropy)    
++ Association with AD through the exposure only (vertical pleiotropy)  
+
 
 #####Figure 9: Proteins for MR
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
-step4_mr_proteins <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step_4_MR_Proteins")
-kable(step4_mr_proteins) %>% kable_styling(bootstrap_options = "condensed", full_width = F, position="left")
+step4_mr_proteins_table <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step_4_MR_Proteins")
+
+step4_mr_res_T1 <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step_4_Prot_to_AD_T1")
+
+step4_mr_res_T2 <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step_4_Prot_to_AD_T2")
+
+step4_mr_res_T3 <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step_4_Prot_to_AD_T3")
+
+step4_mr_res_AD <- read_sheet("https://docs.google.com/spreadsheets/d/1N_Wh36t76ps2jK1WJZiFynTCKJsKVnn_4e7jZNZNnRE/edit#gid=493626447", sheet = "Step_4_AD_to_Prot")
+
+step4_mr_res_table <- data.frame()
+#add protein and short code labels
+step4_mr_res_table <- step4_mr_res_T3 %>% select(Protein, ShortCode) %>% distinct(Protein, ShortCode)
+
+#add tier 1 results
+step4_mr_res_table <- step4_mr_res_table %>% left_join(select(step4_mr_res_T1, pval, ShortCode), by = "ShortCode") 
+#rename col function not working as expected - placeholder approach
+colnames(step4_mr_res_table)[3] <- "Tier 1 min p"
+
+#add tier 2 results
+step4_mr_res_T2_minp <- step4_mr_res_T2 %>% group_by(ShortCode) %>% filter(pval == min(pval))
+step4_mr_res_table <- step4_mr_res_table %>% left_join(select(step4_mr_res_T2_minp, pval, ShortCode), by = "ShortCode")
+colnames(step4_mr_res_table)[4] <- "Tier 2 min p"
+
+#add tier 3 results
+step4_mr_res_T3_minp <- step4_mr_res_T3 %>% group_by(ShortCode) %>% filter(pval == min(pval))
+step4_mr_res_table <- step4_mr_res_table %>% left_join(select(step4_mr_res_T3_minp, pval, ShortCode), by = "ShortCode")
+colnames(step4_mr_res_table)[5] <- "Tier 3 min p"
+  
+#add AD results
+step4_mr_res_AD_minp <- step4_mr_res_AD %>% group_by(ShortCode) %>% filter(pval == min(pval))
+step4_mr_res_table <- step4_mr_res_table %>% left_join(select(step4_mr_res_AD_minp, pval, ShortCode), by = "ShortCode")
+colnames(step4_mr_res_table)[6] <- "AD min p"
+
+#add SNP n to step4_mr_proteins
+#tier1
+step4_mr_proteins_table <- step4_mr_proteins_table %>% left_join(select(step4_mr_res_T1, nsnp, ShortCode), by = "ShortCode") 
+colnames(step4_mr_proteins_table)[5] <- "Tier 1 (n SNPs)"
+
+#tier2
+step4_mr_T2_nsnp <- step4_mr_res_T2 %>% group_by(ShortCode) %>% select(nsnp) %>% distinct(ShortCode, nsnp)
+step4_mr_proteins_table <- step4_mr_proteins_table %>% left_join(select(step4_mr_T2_nsnp, nsnp, ShortCode), by = "ShortCode") 
+colnames(step4_mr_proteins_table)[6] <- "Tier 2 (n SNPs)"
+
+#tier3
+step4_mr_T3_nsnp <- step4_mr_res_T3 %>% group_by(ShortCode) %>% select(nsnp) %>% distinct(ShortCode, nsnp)
+step4_mr_proteins_table <- step4_mr_proteins_table %>% left_join(select(step4_mr_T3_nsnp, nsnp, ShortCode), by = "ShortCode") 
+colnames(step4_mr_proteins_table)[7] <- "Tier 3 (n SNPs)"
+
+#AD
+step4_mr_AD_nsnp <- step4_mr_res_AD %>% group_by(ShortCode) %>% select(nsnp) %>% distinct(ShortCode, nsnp)
+step4_mr_proteins_table <- step4_mr_proteins_table %>% left_join(select(step4_mr_AD_nsnp, nsnp, ShortCode), by = "ShortCode") 
+colnames(step4_mr_proteins_table)[8] <- "AD (n SNPs)"
+
+kable(step4_mr_proteins_table) %>% kable_styling(bootstrap_options = "condensed", full_width = T, position="left")
 ```
 
  
 Proteins were analysed individually as an exposure with AD as the outcome. AD was then used as an exposure with each protein as the outcome to test for reverse causality.  
 Inverse variance weighted MR and sensitivity analysis (e.g. weighted median, weighted mode, MR Egger) was conducted using the R package [MR Base](https://mrcieu.github.io/TwoSampleMR/). 
- 
+
 #####Figure 10: MR Results
 
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+
+#AD min p format requires fixing
+step4_mr_res_table %>% mutate_if(is.numeric, format, scientific=F, digits=3) %>% kable %>% kable_styling(bootstrap_options = "condensed", full_width = T, position="left")
+```
+
+
+#####MR Results - Dynamic (WIP)
 <!-- For knitting and publishing to web, use iframe with "runtime: shiny"" removed to allow "knit" and creation of .html file and eval=FALSE-->
 <!-- <iframe src="https://alexhandy1.shinyapps.io/mr_results/" width=1000 height=1000" frameBorder="0"></iframe> -->
 
-```{r, echo=FALSE, eval=TRUE}
+```{r, echo=FALSE, eval=FALSE}
 shinyApp(
 
   ui <- fluidPage(
