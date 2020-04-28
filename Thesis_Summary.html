@@ -989,14 +989,6 @@ Controls
 </table>
 <p>AD PRS models were tested with and without SNPs from the APOE region at 10 pre-defined p-value thresholds 5e-08 | 1e-05 | 1e-04 | 0.0001 | 0.001 | 0.01 | 0.05 | 0.1 | 0.2 | 0.5 | 1.<br />
 No covariates included as protein phenotype created by taking residuals from regression of protein levels with age, gender and centre.</p>
-<p><strong>ANALYSIS TO-DOS</strong></p>
-<ul>
-<li>Test for collinearity between AD PRS score and AD status in ANM and deciles analysis</li>
-<li>Confirm covariates and run with and without case / control as covariates</li>
-<li>Run AD and Protein PRS stratified by age</li>
-<li>Run Protein PRS deciles association analysis with protein levels in ANM cohort (to check level of association with protein)</li>
-<li>Run Protein PRS deciles association analysis with AD for significant proteins</li>
-</ul>
 <pre><code>#PRSice command to generate AD PRS models
 
 Rscript /mnt/lustre/groups/proitsi/Jodie/prs/Programmes/PRSice.R \
@@ -1080,22 +1072,18 @@ HP
 <div id="step-4---bidirectional-mr" class="section level3">
 <h3>Step 4 - Bidirectional MR</h3>
 <p>Proteins that were significant in one or both PRS were considered for Mendelian Randomisation (MR).<br />
-This resulted in 8 proteins, excluding APOE. 4 proteins had SNPs that passed criteria for use as genetic instruments:</p>
-<ul>
-<li>Genome wide significant cis-eQTLs associated with gene encoding target protein</li>
-<li>Not associated with confounders</li>
-<li>Not associated with outcome (except through exposure)</li>
-<li>Not in LD with other instrumental variables</li>
-</ul>
-<p><strong>ANALYSIS TO-DOS</strong></p>
-<ul>
-<li>Review constraints to include more SNPs for existing 4 proteins and other 4<br />
-</li>
-<li>Apply statistical biological screening for AD and protein SNP instruments</li>
-</ul>
+This resulted in 9 proteins, including APOE.</p>
+<p>Genetic instruments for each protein were selected and analysed in three tiers of descending conservatism.<br />
++ Tier 1 - sentinal variant cis-only pQTLs as defined by Sun et al (p &lt; 1.5e11)<br />
++ Tier 2 - SNPs with p &lt; 5e08 clumped based on LD r2 &lt;0.001 within a 250kb window (to provide n&gt;1 instruments)<br />
++ Tier 3 - SNPs with p &lt; 5e06 clumped based on LD r2 &lt;0.001 within a 250kb window (to provide instruments for all 9 proteins and account for polygenic architecture)</p>
+<p>Genetic instruments were screened for:<br />
++ Association with other blood plasma proteins in Sun et al (horizontal pleiotropy)<br />
++ Association with other potential risk exposures (horizontal pleiotropy)<br />
++ Association with AD through the exposure only (vertical pleiotropy)</p>
 <div id="figure-9-proteins-for-mr" class="section level5">
 <h5>Figure 9: Proteins for MR</h5>
-<table class="table table-condensed" style="width: auto !important; ">
+<table class="table table-condensed" style>
 <thead>
 <tr>
 <th style="text-align:left;">
@@ -1110,44 +1098,45 @@ Protein PRS -&gt; AD
 <th style="text-align:left;">
 AD PRS -&gt; Protein
 </th>
-<th style="text-align:left;">
-cis-eQTL
+<th style="text-align:right;">
+Tier 1 (n SNPs)
+</th>
+<th style="text-align:right;">
+Tier 2 (n SNPs)
+</th>
+<th style="text-align:right;">
+Tier 3 (n SNPs)
+</th>
+<th style="text-align:right;">
+AD (n SNPs)
 </th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left;">
-Interleukin-10
+Apolipoprotein E
 </td>
 <td style="text-align:left;">
-IL10
-</td>
-<td style="text-align:left;">
-N
-</td>
-<td style="text-align:left;">
-Y
-</td>
-<td style="text-align:left;">
-N
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Haptoglobin
-</td>
-<td style="text-align:left;">
-HP
-</td>
-<td style="text-align:left;">
-N
+APOE
 </td>
 <td style="text-align:left;">
 Y
 </td>
 <td style="text-align:left;">
 Y
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+17
 </td>
 </tr>
 <tr>
@@ -1163,19 +1152,25 @@ Y
 <td style="text-align:left;">
 N
 </td>
-<td style="text-align:left;">
-N
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+17
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
-Plasma protease C1 inhibitor
+Haptoglobin
 </td>
 <td style="text-align:left;">
-SERPING1
-</td>
-<td style="text-align:left;">
-Y
+HP
 </td>
 <td style="text-align:left;">
 N
@@ -1183,56 +1178,17 @@ N
 <td style="text-align:left;">
 Y
 </td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Inter-alpha-trypsin inhibitor heavy chain H1
+<td style="text-align:right;">
+1
 </td>
-<td style="text-align:left;">
-ITIH1
+<td style="text-align:right;">
+14
 </td>
-<td style="text-align:left;">
-Y
+<td style="text-align:right;">
+27
 </td>
-<td style="text-align:left;">
-N
-</td>
-<td style="text-align:left;">
-Y
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Serum amyloid P component
-</td>
-<td style="text-align:left;">
-APCS
-</td>
-<td style="text-align:left;">
-Y
-</td>
-<td style="text-align:left;">
-N
-</td>
-<td style="text-align:left;">
-Y
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Prostate-specific antigen
-</td>
-<td style="text-align:left;">
-KLK3
-</td>
-<td style="text-align:left;">
-Y
-</td>
-<td style="text-align:left;">
-N
-</td>
-<td style="text-align:left;">
-N
+<td style="text-align:right;">
+17
 </td>
 </tr>
 <tr>
@@ -1248,8 +1204,147 @@ Y
 <td style="text-align:left;">
 N
 </td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Inter-alpha-trypsin inhibitor heavy chain H1
+</td>
+<td style="text-align:left;">
+ITIH1
+</td>
+<td style="text-align:left;">
+Y
+</td>
 <td style="text-align:left;">
 N
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Interleukin-10
+</td>
+<td style="text-align:left;">
+IL10
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:left;">
+Y
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Plasma protease C1 inhibitor
+</td>
+<td style="text-align:left;">
+SERPING1
+</td>
+<td style="text-align:left;">
+Y
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Prostate-specific antigen
+</td>
+<td style="text-align:left;">
+KLK3
+</td>
+<td style="text-align:left;">
+Y
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Serum amyloid P component
+</td>
+<td style="text-align:left;">
+APCS
+</td>
+<td style="text-align:left;">
+Y
+</td>
+<td style="text-align:left;">
+N
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+17
 </td>
 </tr>
 </tbody>
@@ -1259,9 +1354,217 @@ Inverse variance weighted MR and sensitivity analysis (e.g. weighted median, we
 </div>
 <div id="figure-10-mr-results" class="section level5">
 <h5>Figure 10: MR Results</h5>
+<table class="table table-condensed" style>
+<thead>
+<tr>
+<th style="text-align:left;">
+Protein
+</th>
+<th style="text-align:left;">
+ShortCode
+</th>
+<th style="text-align:left;">
+Tier 1 min p
+</th>
+<th style="text-align:left;">
+Tier 2 min p
+</th>
+<th style="text-align:left;">
+Tier 3 min p
+</th>
+<th style="text-align:left;">
+AD min p
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Haptoglobin
+</td>
+<td style="text-align:left;">
+HP
+</td>
+<td style="text-align:left;">
+0.021
+</td>
+<td style="text-align:left;">
+0.1147
+</td>
+<td style="text-align:left;">
+0.0177
+</td>
+<td style="text-align:left;">
+0.047239835058
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Plasma protease C1 inhibitor
+</td>
+<td style="text-align:left;">
+SERPING1
+</td>
+<td style="text-align:left;">
+0.130
+</td>
+<td style="text-align:left;">
+0.0616
+</td>
+<td style="text-align:left;">
+0.0838
+</td>
+<td style="text-align:left;">
+0.693418101122
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Serum amyloid P component
+</td>
+<td style="text-align:left;">
+APCS
+</td>
+<td style="text-align:left;">
+0.557
+</td>
+<td style="text-align:left;">
+0.1989
+</td>
+<td style="text-align:left;">
+0.3371
+</td>
+<td style="text-align:left;">
+0.204790887080
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Inter-alpha-trypsin inhibitor heavy chain H1
+</td>
+<td style="text-align:left;">
+ITIH1
+</td>
+<td style="text-align:left;">
+0.654
+</td>
+<td style="text-align:left;">
+0.5370
+</td>
+<td style="text-align:left;">
+0.3221
+</td>
+<td style="text-align:left;">
+0.583447812755
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Apolipoprotein E
+</td>
+<td style="text-align:left;">
+APOE
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+0.3871
+</td>
+<td style="text-align:left;">
+0.000000000112
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Interleukin-10
+</td>
+<td style="text-align:left;">
+IL10
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+0.7962
+</td>
+<td style="text-align:left;">
+0.3018
+</td>
+<td style="text-align:left;">
+0.144925185291
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Complement component C6
+</td>
+<td style="text-align:left;">
+C6
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+0.0200
+</td>
+<td style="text-align:left;">
+0.1175
+</td>
+<td style="text-align:left;">
+0.268592892873
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Prostate-specific antigen
+</td>
+<td style="text-align:left;">
+KLK3
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+0.2290
+</td>
+<td style="text-align:left;">
+0.524624714681
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Insulin-like growth factor-binding protein 2
+</td>
+<td style="text-align:left;">
+IGFBP2
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:left;">
+0.3485
+</td>
+<td style="text-align:left;">
+0.266504373232
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="mr-results---dynamic-wip" class="section level5">
+<h5>MR Results - Dynamic (WIP)</h5>
 <!-- For knitting and publishing to web, use iframe with "runtime: shiny"" removed to allow "knit" and creation of .html file and eval=FALSE-->
-<iframe src="https://alexhandy1.shinyapps.io/mr_results/" width="1000" height="1000&quot;" frameBorder="0">
-</iframe>
+<!-- <iframe src="https://alexhandy1.shinyapps.io/mr_results/" width=1000 height=1000" frameBorder="0"></iframe> -->
 </div>
 </div>
 </div>
