@@ -355,7 +355,7 @@ step4_mr_AD_nsnp <- step4_mr_res_AD %>% group_by(ShortCode) %>% select(nsnp) %>%
 step4_mr_proteins_table <- step4_mr_proteins_table %>% left_join(select(step4_mr_AD_nsnp, nsnp, ShortCode), by = "ShortCode") 
 colnames(step4_mr_proteins_table)[8] <- "AD (n SNPs)"
 
-kable(step4_mr_proteins_table) %>% kable_styling(bootstrap_options = "condensed", full_width = T, position="left")
+step4_mr_proteins_table %>% arrange(Protein) %>% kable() %>% kable_styling(bootstrap_options = "condensed", full_width = T, position="left")
 ```
 
  
@@ -367,7 +367,7 @@ Inverse variance weighted MR and sensitivity analysis (e.g. weighted median, wei
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 
 #AD min p format requires fixing
-step4_mr_res_table %>% mutate_if(is.numeric, format, scientific=F, digits=3) %>% kable %>% kable_styling(bootstrap_options = "condensed", full_width = T, position="left")
+step4_mr_res_table %>% arrange(`Tier 1 min p`) %>% mutate_if(is.numeric, format, scientific=F, digits=3) %>% kable %>% kable_styling(bootstrap_options = "condensed", full_width = T, position="left")
 ```
 
 
