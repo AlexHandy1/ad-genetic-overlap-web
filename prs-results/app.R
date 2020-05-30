@@ -54,14 +54,6 @@ server <- function(input, output) {
             ggplot(no_apoe_res, aes(Protein, P_MinusLog10, label=Threshold, fill=Significant)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="blue", "N"="gray" ), guide = FALSE )
         }
     })
-    
-    # output$table <- renderTable({
-    #     tableInput <- if(input$apoe == "With-APOE") {
-    #         with_apoe_res   
-    #     } else {
-    #         no_apoe_res
-    #     }
-    # })
 }
 
 # Run the application 
