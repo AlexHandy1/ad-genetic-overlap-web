@@ -10,17 +10,13 @@ To-do
 -------
 
 ```
-- [-] Fix Google Drive authentication 
+- [-] Create simplified chart mock-ups from existing code and results in R markdown
 
-- [-] Create graphical abstract and embed image
+- [-] Review data storage approach (e.g. worth investing time to fix Google Drive authentication bug)
 
-- [-] Update end-to-end results based on final analysis run
+- [-] Create Shiny app template for interactive PRS results (with / without APOE, male / female, age categories)
 
-- [-] Add updated imagery to shiny app for MR results
-
-- [-] Review styling for all graphics
-
-- [-] Add shiny app to dynamically present PRS results
+- [-] Create Shiny app template for MR results 
 
 - [-] Publish to web to provide shareable URL
 

@@ -26,6 +26,7 @@ Investigate the genetic association between blood plasma proteins and Alzheimerâ
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 #Load libraries
 library(googledrive)
+options(gargle_quiet = FALSE)
 library(googlesheets4)
 library(dplyr)
 library(knitr)
@@ -426,7 +427,7 @@ shinyApp(
      }, deleteFile = FALSE)
      
      AD_Prt_res <- read.csv("AD_Prt_Results.csv")
-   Prt_AD_res <- read.csv("Prt_AD_Results.csv")
+     Prt_AD_res <- read.csv("Prt_AD_Results.csv")
    
    output$table <- renderTable({
      
