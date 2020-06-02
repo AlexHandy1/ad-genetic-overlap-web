@@ -15,18 +15,31 @@ library(ggplot2)
 ui <- fluidPage(
 
     # Application title
-    titlePanel("Step 3 AD PRS to Protein Results"),
+    titlePanel(""),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            selectInput("apoe", strong("APOE"), 
-                        choices = c("With-APOE","No-APOE"), selected = "With-APOE")
+            selectInput("step", strong("Analysis Step"), 
+                        choices = c("2","3"), selected = "2"),
+            
+            conditionalPanel(
+                condition = "input.step == '3'",
+                selectInput("apoe", strong("APOE"), 
+                            choices = c("With-APOE","No-APOE"), selected = "With-APOE"),
+            )
         ),
 
         # Show a plot of the generated distribution
         mainPanel(
-           plotOutput("prs")
+           conditionalPanel(
+               condition = "input.step == '2'",
+               plotOutput("h2")
+           ),
+           conditionalPanel(
+               condition = "input.step == '3'",
+               plotOutput("prs")
+           )
         )
     )
 )
@@ -34,11 +47,20 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
     
-    #Load data
+    #Load step 2 data
+    h2_res <- read.csv("Step2_protein_h2_results.csv", header=T)
+    
+    #Prepare step 2 data
+    h2_res <- h2_res %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything())
+    h2_res <- h2_res %>% select("Protein Short Code", "h2_no_se", "h2_se")
+    names(h2_res) <- c("Protein", "h2", "h2_se")
+
+    
+    #Load step 3 data
     with_apoe_res <- read.csv("Step3_PRS_Results_With_APOE.csv", header=T)
     no_apoe_res <- read.csv("Step3_PRS_Results_No_APOE.csv", header=T)
     
-    #Prepare data
+    #Prepare step 3 data
     with_apoe_res <- with_apoe_res %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
     names(with_apoe_res)[1] <- "Protein"
     no_apoe_res <- no_apoe_res %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
@@ -46,6 +68,10 @@ server <- function(input, output) {
     
     with_apoe_res <- with_apoe_res %>% mutate(P_MinusLog10 = -log10(P), Significant = if_else(P < 0.05, "Y","N"))
     no_apoe_res <- no_apoe_res %>% mutate(P_MinusLog10 = -log10(P), Significant = if_else(P < 0.05, "Y","N"))
+    
+    output$h2 <- renderPlot({
+        ggplot(data = h2_res) + geom_pointrange(mapping = aes(x=Protein, y=h2, ymin=h2-h2_se, ymax=h2+h2_se)) + geom_hline(yintercept=1, linetype="dashed", color = "red") + geom_hline(yintercept=0, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
+    })
     
     output$prs <- renderPlot({
         if(input$apoe == "With-APOE") {

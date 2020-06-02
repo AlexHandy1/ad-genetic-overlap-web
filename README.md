@@ -10,9 +10,9 @@ To-do
 -------
 
 ```
-- [-] Create simplified chart mock-ups from existing code and results in R markdown
+- [X] Create simplified chart mock-ups from existing code and results in R markdown
 
-- [-] Review data storage approach (e.g. worth investing time to fix Google Drive authentication bug)
+- [-] Review data storage approach (e.g. worth investing time to fix Google Drive authentication bug)  
 
 - [-] Create Shiny app template for interactive PRS results (with / without APOE, male / female, age categories)
 
