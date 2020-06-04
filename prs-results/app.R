@@ -54,6 +54,7 @@ server <- function(input, output) {
     h2_res <- h2_res %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything())
     h2_res <- h2_res %>% select("Protein Short Code", "h2_no_se", "h2_se")
     names(h2_res) <- c("Protein", "h2", "h2_se")
+    #h2_res <- h2_res %>% arrange(desc(h2))    
 
     
     #Load step 3 data
@@ -69,8 +70,9 @@ server <- function(input, output) {
     with_apoe_res <- with_apoe_res %>% mutate(P_MinusLog10 = -log10(P), Significant = if_else(P < 0.05, "Y","N"))
     no_apoe_res <- no_apoe_res %>% mutate(P_MinusLog10 = -log10(P), Significant = if_else(P < 0.05, "Y","N"))
     
+    #consider adding legend (few attempts inc. geom_text and adding aes layer to hline. Conclusion is may require chart redesign)
     output$h2 <- renderPlot({
-        ggplot(data = h2_res) + geom_pointrange(mapping = aes(x=Protein, y=h2, ymin=h2-h2_se, ymax=h2+h2_se)) + geom_hline(yintercept=1, linetype="dashed", color = "red") + geom_hline(yintercept=0, linetype="dashed", color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
+        ggplot(data = h2_res) + geom_pointrange(mapping = aes(x=reorder(Protein,h2), y=h2, ymin=h2-h2_se, ymax=h2+h2_se)) + geom_hline(yintercept=1, linetype="dashed", color = "red") + geom_hline(yintercept=mean(h2_res$h2), linetype="dashed", color = "blue") + geom_hline(yintercept=0, linetype="dashed", color = "red") + xlab("Protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
     })
     
     output$prs <- renderPlot({
