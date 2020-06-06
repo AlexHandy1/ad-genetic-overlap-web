@@ -9,17 +9,26 @@ Summary
 To-do
 -------
 
+X = "Complete"  
+
+- = "Work in progress"  
+
+O = "Not started"  
+
+
 ```
 - [X] Create simplified chart mock-ups from existing code and results in R markdown
 
 - [-] Review data storage approach (e.g. worth investing time to fix Google Drive authentication bug)  
 
 - [-] Create Shiny app template for interactive PRS results (with / without APOE, male / female, age categories)
+    - [O] Design non repetitive method to prepare and display results across x14 options   
+    - [O] Tidy chart presentation  
 
-- [-] Create Shiny app template for MR results 
+- [O] Create Shiny app template for MR results 
 
-- [-] Publish to web to provide shareable URL
+- [O] Publish to web to provide shareable URL
 
-- [-] Add functionality to support packaging into academic poster
+- [O] Add functionality to support packaging into academic poster
 
 ```
