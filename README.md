@@ -9,14 +9,14 @@ Summary
 To-do
 -------
 
-X = "Complete"  
-
-- = "Work in progress"  
-
-O = "Not started"  
-
-
 ```
+[X] = "Complete"  
+
+[-] = "Work in progress"  
+
+[O] = "Not started"  
+
+
 - [X] Create simplified chart mock-ups from existing code and results in R markdown
 
 - [-] Review data storage approach (e.g. worth investing time to fix Google Drive authentication bug)  
