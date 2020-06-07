@@ -11,6 +11,24 @@ library(shiny)
 library(dplyr)
 library(ggplot2)
 
+select_data <- function(apoe, group, results){
+    if (apoe == "With-APOE" & group == "All"){ results[[1]] }
+    else if (apoe == "No-APOE" & group == "All") { results[[2]] }
+    else if (apoe == "With-APOE" & group == "Males") { results[[3]] }
+    else if (apoe == "No-APOE" & group == "Males") { results[[4]] }
+    else if (apoe == "With-APOE" & group == "Females") { results[[5]] }
+    else if (apoe == "No-APOE" & group == "Females") { results[[6]] }
+    else if (apoe == "With-APOE" & group == "65.And.Over") { results[[7]] }
+    else if (apoe == "No-APOE" & group == "65.And.Over") { results[[8]] }
+    else if (apoe == "With-APOE" & group == "70.And.Over") { results[[9]] }
+    else if (apoe == "No-APOE" & group == "70.And.Over") { results[[10]] }
+    else if (apoe == "With-APOE" & group == "75.And.Over") { results[[11]] }
+    else if (apoe == "No-APOE" & group == "75.And.Over") { results[[12]] }
+    else if (apoe == "With-APOE" & group == "80.And.Over") { results[[13]] }
+    else if (apoe == "No-APOE" & group == "80.And.Over") { results[[14]] }
+    else { }
+}
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
 
@@ -42,7 +60,6 @@ ui <- fluidPage(
             )
         ),
 
-        # Show a plot of the generated distribution
         mainPanel(
            conditionalPanel(
                condition = "input.step == '2' & input.chart == 'heritability'",
@@ -53,6 +70,12 @@ ui <- fluidPage(
                condition = "input.step == '2' & input.chart == 'individual-sample-prs'",
                plotOutput("prs_indiv")
            ),
+           
+           conditionalPanel(
+               condition = "input.step == '2' & input.chart == 'individual-sample-prs'",
+               tableOutput("prs_indiv_table")
+           ),
+           
            
            conditionalPanel(
                condition = "input.step == '2' & input.chart == 'meta-analysis-prs'",
@@ -73,28 +96,50 @@ server <- function(input, output) {
     h2_res <- h2_res %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything())
     h2_res <- h2_res %>% select("Protein Short Code", "h2_no_se", "h2_se")
     names(h2_res) <- c("Protein", "h2", "h2_se")
-    #h2_res <- h2_res %>% arrange(desc(h2))    
 
     #Load step 2 prs data
     
     #individual-sample-prs
     step2_prs_all_with_apoe_res <- read.csv("Step2_Results/protein_prs_all_with_apoe_indiv_sample_res.csv", header=T)
     step2_prs_all_no_apoe_res <- read.csv("Step2_Results/protein_prs_all_no_apoe_indiv_sample_res.csv", header=T)    
+   
+    step2_prs_males_with_apoe_res <- read.csv("Step2_Results/protein_prs_Males_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_males_no_apoe_res <- read.csv("Step2_Results/protein_prs_Males_no_apoe_indiv_sample_res.csv", header=T)    
+    
+    step2_prs_females_with_apoe_res <- read.csv("Step2_Results/protein_prs_Females_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_females_no_apoe_res <- read.csv("Step2_Results/protein_prs_Females_no_apoe_indiv_sample_res.csv", header=T)    
+    
+    step2_prs_65_with_apoe_res <- read.csv("Step2_Results/protein_prs_65.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_65_no_apoe_res <- read.csv("Step2_Results/protein_prs_65.And.Over_no_apoe_indiv_sample_res.csv", header=T)    
+    
+    step2_prs_70_with_apoe_res <- read.csv("Step2_Results/protein_prs_70.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_70_no_apoe_res <- read.csv("Step2_Results/protein_prs_70.And.Over_no_apoe_indiv_sample_res.csv", header=T)    
+    
+    step2_prs_75_with_apoe_res <- read.csv("Step2_Results/protein_prs_75.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_75_no_apoe_res <- read.csv("Step2_Results/protein_prs_75.And.Over_no_apoe_indiv_sample_res.csv", header=T)  
+    
+    step2_prs_80_with_apoe_res <- read.csv("Step2_Results/protein_prs_80.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_80_no_apoe_res <- read.csv("Step2_Results/protein_prs_80.And.Over_no_apoe_indiv_sample_res.csv", header=T)
+    
+    step2_res <- list(step2_prs_all_with_apoe_res, 
+                      step2_prs_all_no_apoe_res, 
+                      step2_prs_males_with_apoe_res, 
+                      step2_prs_males_no_apoe_res, 
+                      step2_prs_females_with_apoe_res, 
+                      step2_prs_females_no_apoe_res,
+                      step2_prs_65_with_apoe_res,
+                      step2_prs_65_no_apoe_res,
+                      step2_prs_70_with_apoe_res,
+                      step2_prs_70_no_apoe_res,
+                      step2_prs_75_with_apoe_res,
+                      step2_prs_75_no_apoe_res,
+                      step2_prs_80_with_apoe_res,
+                      step2_prs_80_no_apoe_res)
+
     
     #meta-analysis-prs
     step2_prs_all_with_apoe_meta <- read.csv("Step2_Results/protein_prs_all_with_apoe_meta_analysis_res.csv", header=T)
     step2_prs_all_no_apoe_meta <- read.csv("Step2_Results/protein_prs_all_no_apoe_meta_analysis_res.csv", header=T)    
-    
-    #Prepare step 2 prs data
-    
-    #individual-sample-prs
-    step2_prs_all_with_apoe_res <- step2_prs_all_with_apoe_res %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
-    names(step2_prs_all_with_apoe_res)[1] <- "Protein"
-    step2_prs_all_with_apoe_res <- step2_prs_all_with_apoe_res %>% mutate("Protein_Sample" = paste(Protein, Sample))
-    
-    step2_prs_all_no_apoe_res <- step2_prs_all_no_apoe_res %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
-    names(step2_prs_all_no_apoe_res)[1] <- "Protein"
-    step2_prs_all_no_apoe_res <- step2_prs_all_no_apoe_res %>% mutate("Protein_Sample" = paste(Protein, Sample))
     
     #meta-analysis-prs
     
@@ -115,21 +160,40 @@ server <- function(input, output) {
     
     output$prs_indiv <- renderPlot({
         
-        if(input$apoe == "With-APOE" & input$group == "All"){
-            ggplot(step2_prs_all_with_apoe_res, aes(Protein, P_MinusLog10, fill=Sample)) + geom_bar(stat = "identity", position=position_dodge()) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0)) + ylab("-log10 p-value") + xlab("Protein") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red"))))
-        } else if (input$apoe == "No-APOE" & input$group == "All") {
-            ggplot(step2_prs_all_no_apoe_res, aes(Protein, P_MinusLog10, fill=Sample)) + geom_bar(stat = "identity", position=position_dodge()) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0)) + ylab("-log10 p-value") + xlab("Protein") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red"))))
-        } else {
-        }
+        apoe <- input$apoe
+        group <- input$group
+        
+        chart_data <- select_data(apoe, group, step2_res)
+        
+        #issue with sample data labels for groups (review results preparation script)
+        chart_data <- chart_data %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
+        names(chart_data)[1] <- "Protein"
+        chart_data <- chart_data %>% mutate("Protein_Sample" = paste(Protein, Sample))
+        
+        ggplot(chart_data, aes(Protein, P_MinusLog10, fill=Sample)) + geom_bar(stat = "identity", position=position_dodge()) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0)) + ylab("-log10 p-value") + xlab("Protein") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red"))))
+        
+    })
+    
+    output$prs_indiv_table <- renderTable({ 
+        
+        apoe <- input$apoe
+        group <- input$group
+        
+        table_data <- select_data(apoe, group, step2_res)
+ 
+        table <- table_data %>% filter(Significant == "Y") %>% select(Protein, Sample, Threshold, P) %>% mutate_if(is.numeric, format, scientific=T, digits=1)
+    
     })
     
     output$prs_meta <- renderPlot({
+        
         if(input$apoe == "With-APOE" & input$group == "All") {
             ggplot(step2_prs_all_with_apoe_meta_min_p, aes(Protein, P_MinusLog10, label=Threshold, fill=Significant)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="blue", "N"="gray" ), guide = FALSE )
         } else if (input$apoe == "No-APOE" & input$group == "All") {
             ggplot(step2_prs_all_no_apoe_meta_min_p, aes(Protein, P_MinusLog10, label=Threshold, fill=Significant)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="blue", "N"="gray" ), guide = FALSE )
         } else {
         }
+        
     })
 }
 
