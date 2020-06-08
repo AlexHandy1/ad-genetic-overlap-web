@@ -42,7 +42,7 @@ ui <- fluidPage(
                         choices = c("2","3"), selected = "2"),
             
             conditionalPanel(
-                condition = "input.step == '2'",
+                condition = "input.step == '2' | input.step == '3'",
                 selectInput("chart", strong("Chart"), 
                             choices = c("heritability","individual-sample-prs","meta-analysis-prs"), selected = "heritability"),
             ), 
@@ -80,6 +80,11 @@ ui <- fluidPage(
            conditionalPanel(
                condition = "input.step == '2' & input.chart == 'meta-analysis-prs'",
                plotOutput("prs_meta")
+           ),
+           
+           conditionalPanel(
+               condition = "input.step == '2' & input.chart == 'meta-analysis-prs'",
+               tableOutput("prs_meta_table")
            )
         )
     )
@@ -121,7 +126,7 @@ server <- function(input, output) {
     step2_prs_80_with_apoe_res <- read.csv("Step2_Results/protein_prs_80.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
     step2_prs_80_no_apoe_res <- read.csv("Step2_Results/protein_prs_80.And.Over_no_apoe_indiv_sample_res.csv", header=T)
     
-    step2_res <- list(step2_prs_all_with_apoe_res, 
+    step2_prs_res_indiv <- list(step2_prs_all_with_apoe_res, 
                       step2_prs_all_no_apoe_res, 
                       step2_prs_males_with_apoe_res, 
                       step2_prs_males_no_apoe_res, 
@@ -141,15 +146,38 @@ server <- function(input, output) {
     step2_prs_all_with_apoe_meta <- read.csv("Step2_Results/protein_prs_all_with_apoe_meta_analysis_res.csv", header=T)
     step2_prs_all_no_apoe_meta <- read.csv("Step2_Results/protein_prs_all_no_apoe_meta_analysis_res.csv", header=T)    
     
-    #meta-analysis-prs
+    step2_prs_males_with_apoe_meta <- read.csv("Step2_Results/protein_prs_Males_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_males_no_apoe_meta <- read.csv("Step2_Results/protein_prs_Males_no_apoe_meta_analysis_res.csv", header=T)
     
-    step2_prs_all_with_apoe_meta  <- step2_prs_all_with_apoe_meta  %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
-    names(step2_prs_all_with_apoe_meta)[1] <- "Protein"
-    step2_prs_all_with_apoe_meta_min_p <- step2_prs_all_with_apoe_meta %>% group_by(Protein) %>% filter(p == min(p))
+    step2_prs_females_with_apoe_meta <- read.csv("Step2_Results/protein_prs_Females_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_females_no_apoe_meta <- read.csv("Step2_Results/protein_prs_Females_no_apoe_meta_analysis_res.csv", header=T)
     
-    step2_prs_all_no_apoe_meta  <- step2_prs_all_no_apoe_meta  %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
-    names(step2_prs_all_no_apoe_meta)[1] <- "Protein"
-    step2_prs_all_no_apoe_meta_min_p <- step2_prs_all_no_apoe_meta %>% group_by(Protein) %>% filter(p == min(p))
+    step2_prs_65_with_apoe_meta <- read.csv("Step2_Results/protein_prs_65.And.Over_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_65_no_apoe_meta <- read.csv("Step2_Results/protein_prs_65.And.Over_no_apoe_meta_analysis_res.csv", header=T)
+    
+    step2_prs_70_with_apoe_meta <- read.csv("Step2_Results/protein_prs_70.And.Over_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_70_no_apoe_meta <- read.csv("Step2_Results/protein_prs_70.And.Over_no_apoe_meta_analysis_res.csv", header=T)
+    
+    step2_prs_75_with_apoe_meta <- read.csv("Step2_Results/protein_prs_75.And.Over_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_75_no_apoe_meta <- read.csv("Step2_Results/protein_prs_75.And.Over_no_apoe_meta_analysis_res.csv", header=T)
+    
+    step2_prs_80_with_apoe_meta <- read.csv("Step2_Results/protein_prs_80.And.Over_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_80_no_apoe_meta <- read.csv("Step2_Results/protein_prs_80.And.Over_no_apoe_meta_analysis_res.csv", header=T)
+    
+    step2_prs_res_meta <- list(step2_prs_all_with_apoe_meta,
+                               step2_prs_all_no_apoe_meta, 
+                      step2_prs_males_with_apoe_meta, 
+                      step2_prs_males_no_apoe_meta, 
+                      step2_prs_females_with_apoe_meta, 
+                      step2_prs_females_no_apoe_meta,
+                      step2_prs_65_with_apoe_meta,
+                      step2_prs_65_no_apoe_meta,
+                      step2_prs_70_with_apoe_meta,
+                      step2_prs_70_no_apoe_meta,
+                      step2_prs_75_with_apoe_meta,
+                      step2_prs_75_no_apoe_meta,
+                      step2_prs_80_with_apoe_meta,
+                      step2_prs_80_no_apoe_meta)
     
     #OUTPUT#
     
@@ -163,14 +191,14 @@ server <- function(input, output) {
         apoe <- input$apoe
         group <- input$group
         
-        chart_data <- select_data(apoe, group, step2_res)
+        chart_data <- select_data(apoe, group, step2_prs_res_indiv)
         
         #issue with sample data labels for groups (review results preparation script)
         chart_data <- chart_data %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
         names(chart_data)[1] <- "Protein"
         chart_data <- chart_data %>% mutate("Protein_Sample" = paste(Protein, Sample))
         
-        ggplot(chart_data, aes(Protein, P_MinusLog10, fill=Sample)) + geom_bar(stat = "identity", position=position_dodge()) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + theme(axis.text.x=element_text(angle = -90, hjust = 0)) + ylab("-log10 p-value") + xlab("Protein") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red"))))
+        ggplot(chart_data, aes(Protein, P_MinusLog10, fill=Sample)) + geom_bar(stat = "identity", position=position_dodge()) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=2.792392, linetype="Bonferroni corrected"), color = "green") + theme(axis.text.x=element_text(angle = -90, hjust = 0)) + ylab("-log10 p-value") + xlab("Protein") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue"))))
         
     })
     
@@ -179,7 +207,7 @@ server <- function(input, output) {
         apoe <- input$apoe
         group <- input$group
         
-        table_data <- select_data(apoe, group, step2_res)
+        table_data <- select_data(apoe, group, step2_prs_res_indiv)
  
         table <- table_data %>% filter(Significant == "Y") %>% select(Protein, Sample, Threshold, P) %>% mutate_if(is.numeric, format, scientific=T, digits=1)
     
@@ -187,12 +215,32 @@ server <- function(input, output) {
     
     output$prs_meta <- renderPlot({
         
-        if(input$apoe == "With-APOE" & input$group == "All") {
-            ggplot(step2_prs_all_with_apoe_meta_min_p, aes(Protein, P_MinusLog10, label=Threshold, fill=Significant)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="blue", "N"="gray" ), guide = FALSE )
-        } else if (input$apoe == "No-APOE" & input$group == "All") {
-            ggplot(step2_prs_all_no_apoe_meta_min_p, aes(Protein, P_MinusLog10, label=Threshold, fill=Significant)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "red") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("red")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="blue", "N"="gray" ), guide = FALSE )
-        } else {
-        }
+        apoe <- input$apoe
+        group <- input$group
+        
+        chart_data <- select_data(apoe, group, step2_prs_res_meta)
+        
+        chart_data  <- chart_data  %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
+        names(chart_data)[1] <- "Protein"
+        chart_data <- chart_data %>% group_by(Protein) %>% filter(p == min(p))
+        
+
+        ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=Significant)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=2.792392, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="blue", "N"="gray" ), guide = FALSE )
+        
+    })
+    
+    output$prs_meta_table <- renderTable({ 
+        
+        apoe <- input$apoe
+        group <- input$group
+        
+        table_data <- select_data(apoe, group, step2_prs_res_meta)
+        
+        table_data  <- table_data  %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
+        names(table_data)[1] <- "Protein"
+        table_data <- table_data %>% group_by(Protein) %>% filter(p == min(p))
+        
+        table <- table_data %>% filter(Significant == "Y") %>% select(Protein, p) %>% mutate_if(is.numeric, format, scientific=T, digits=1)
         
     })
 }
