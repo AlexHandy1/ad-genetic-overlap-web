@@ -1,7 +1,9 @@
 Summary
 -------
 
-* R Shiny app summarising results for research project assessing genetic overlap between blood plasma proteins and Alzheimer’s Disease (AD) using Polygenic Risk Scores (PRS) and Mendelian Randomization (MR)  
+* R Shiny app summarising results for research project assessing genetic overlap between blood plasma proteins and Alzheimer’s Disease (AD) using Polygenic Risk Scores (PRS) and Mendelian Randomization (MR).  
+* Web dashboard [here](https://alexhandy1.shinyapps.io/ad-genetic-overlap-web-results/)
+
 
 To-do
 -------
@@ -24,7 +26,7 @@ To-do
 
 - [O] Create Shiny app template for MR results 
 
-- [O] Publish to web to provide shareable URL
+- [X] Publish to web to provide shareable URL
 
 - [O] Add functionality to support packaging into academic poster
 

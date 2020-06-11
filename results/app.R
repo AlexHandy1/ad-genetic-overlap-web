@@ -89,7 +89,7 @@ server <- function(input, output) {
     #DATA PREPARATION#
     
     #Load step 2 h2 data
-    h2_res <- read.csv("Step2_Results/protein_h2_results.csv", header=T)
+    h2_res <- read.csv("step2_results/protein_h2_results.csv", header=T)
     
     #Prepare step 2 h2 data
     h2_res <- h2_res %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything())
@@ -99,26 +99,26 @@ server <- function(input, output) {
     #Load step 2 prs data
     
     #Individual sample PRS
-    step2_prs_all_with_apoe_res <- read.csv("Step2_Results/protein_prs_all_with_apoe_indiv_sample_res.csv", header=T)
-    step2_prs_all_no_apoe_res <- read.csv("Step2_Results/protein_prs_all_no_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_all_with_apoe_res <- read.csv("step2_results/protein_prs_all_with_apoe_indiv_sample_res.csv", header=T)
+    step2_prs_all_no_apoe_res <- read.csv("step2_results/protein_prs_all_no_apoe_indiv_sample_res.csv", header=T)    
    
-    step2_prs_males_with_apoe_res <- read.csv("Step2_Results/protein_prs_Males_with_apoe_indiv_sample_res.csv", header=T)    
-    step2_prs_males_no_apoe_res <- read.csv("Step2_Results/protein_prs_Males_no_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_males_with_apoe_res <- read.csv("step2_results/protein_prs_Males_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_males_no_apoe_res <- read.csv("step2_results/protein_prs_Males_no_apoe_indiv_sample_res.csv", header=T)    
     
-    step2_prs_females_with_apoe_res <- read.csv("Step2_Results/protein_prs_Females_with_apoe_indiv_sample_res.csv", header=T)    
-    step2_prs_females_no_apoe_res <- read.csv("Step2_Results/protein_prs_Females_no_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_females_with_apoe_res <- read.csv("step2_results/protein_prs_Females_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_females_no_apoe_res <- read.csv("step2_results/protein_prs_Females_no_apoe_indiv_sample_res.csv", header=T)    
     
-    step2_prs_65_with_apoe_res <- read.csv("Step2_Results/protein_prs_65.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
-    step2_prs_65_no_apoe_res <- read.csv("Step2_Results/protein_prs_65.And.Over_no_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_65_with_apoe_res <- read.csv("step2_results/protein_prs_65.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_65_no_apoe_res <- read.csv("step2_results/protein_prs_65.And.Over_no_apoe_indiv_sample_res.csv", header=T)    
     
-    step2_prs_70_with_apoe_res <- read.csv("Step2_Results/protein_prs_70.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
-    step2_prs_70_no_apoe_res <- read.csv("Step2_Results/protein_prs_70.And.Over_no_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_70_with_apoe_res <- read.csv("step2_results/protein_prs_70.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_70_no_apoe_res <- read.csv("step2_results/protein_prs_70.And.Over_no_apoe_indiv_sample_res.csv", header=T)    
     
-    step2_prs_75_with_apoe_res <- read.csv("Step2_Results/protein_prs_75.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
-    step2_prs_75_no_apoe_res <- read.csv("Step2_Results/protein_prs_75.And.Over_no_apoe_indiv_sample_res.csv", header=T)  
+    step2_prs_75_with_apoe_res <- read.csv("step2_results/protein_prs_75.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_75_no_apoe_res <- read.csv("step2_results/protein_prs_75.And.Over_no_apoe_indiv_sample_res.csv", header=T)  
     
-    step2_prs_80_with_apoe_res <- read.csv("Step2_Results/protein_prs_80.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
-    step2_prs_80_no_apoe_res <- read.csv("Step2_Results/protein_prs_80.And.Over_no_apoe_indiv_sample_res.csv", header=T)
+    step2_prs_80_with_apoe_res <- read.csv("step2_results/protein_prs_80.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
+    step2_prs_80_no_apoe_res <- read.csv("step2_results/protein_prs_80.And.Over_no_apoe_indiv_sample_res.csv", header=T)
     
     step2_prs_res_indiv <- list(step2_prs_all_with_apoe_res, 
                       step2_prs_all_no_apoe_res, 
@@ -137,26 +137,26 @@ server <- function(input, output) {
 
     
     #Meta-analysis PRS
-    step2_prs_all_with_apoe_meta <- read.csv("Step2_Results/protein_prs_all_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_all_no_apoe_meta <- read.csv("Step2_Results/protein_prs_all_no_apoe_meta_analysis_res.csv", header=T)    
+    step2_prs_all_with_apoe_meta <- read.csv("step2_results/protein_prs_all_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_all_no_apoe_meta <- read.csv("step2_results/protein_prs_all_no_apoe_meta_analysis_res.csv", header=T)    
     
-    step2_prs_males_with_apoe_meta <- read.csv("Step2_Results/protein_prs_Males_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_males_no_apoe_meta <- read.csv("Step2_Results/protein_prs_Males_no_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_males_with_apoe_meta <- read.csv("step2_results/protein_prs_Males_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_males_no_apoe_meta <- read.csv("step2_results/protein_prs_Males_no_apoe_meta_analysis_res.csv", header=T)
     
-    step2_prs_females_with_apoe_meta <- read.csv("Step2_Results/protein_prs_Females_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_females_no_apoe_meta <- read.csv("Step2_Results/protein_prs_Females_no_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_females_with_apoe_meta <- read.csv("step2_results/protein_prs_Females_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_females_no_apoe_meta <- read.csv("step2_results/protein_prs_Females_no_apoe_meta_analysis_res.csv", header=T)
     
-    step2_prs_65_with_apoe_meta <- read.csv("Step2_Results/protein_prs_65.And.Over_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_65_no_apoe_meta <- read.csv("Step2_Results/protein_prs_65.And.Over_no_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_65_with_apoe_meta <- read.csv("step2_results/protein_prs_65.And.Over_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_65_no_apoe_meta <- read.csv("step2_results/protein_prs_65.And.Over_no_apoe_meta_analysis_res.csv", header=T)
     
-    step2_prs_70_with_apoe_meta <- read.csv("Step2_Results/protein_prs_70.And.Over_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_70_no_apoe_meta <- read.csv("Step2_Results/protein_prs_70.And.Over_no_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_70_with_apoe_meta <- read.csv("step2_results/protein_prs_70.And.Over_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_70_no_apoe_meta <- read.csv("step2_results/protein_prs_70.And.Over_no_apoe_meta_analysis_res.csv", header=T)
     
-    step2_prs_75_with_apoe_meta <- read.csv("Step2_Results/protein_prs_75.And.Over_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_75_no_apoe_meta <- read.csv("Step2_Results/protein_prs_75.And.Over_no_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_75_with_apoe_meta <- read.csv("step2_results/protein_prs_75.And.Over_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_75_no_apoe_meta <- read.csv("step2_results/protein_prs_75.And.Over_no_apoe_meta_analysis_res.csv", header=T)
     
-    step2_prs_80_with_apoe_meta <- read.csv("Step2_Results/protein_prs_80.And.Over_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_80_no_apoe_meta <- read.csv("Step2_Results/protein_prs_80.And.Over_no_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_80_with_apoe_meta <- read.csv("step2_results/protein_prs_80.And.Over_with_apoe_meta_analysis_res.csv", header=T)
+    step2_prs_80_no_apoe_meta <- read.csv("step2_results/protein_prs_80.And.Over_no_apoe_meta_analysis_res.csv", header=T)
     
     step2_prs_res_meta <- list(step2_prs_all_with_apoe_meta,
                                step2_prs_all_no_apoe_meta, 
