@@ -1,10 +1,7 @@
 Summary
 -------
 
-* R markdown document summarising results (work-in-progress) for research project assessing genetic overlap between blood plasma proteins and Alzheimer’s Disease (AD) using Polygenic Risk Scores (PRS) and Mendelian Randomization (MR)   
-
-* Plan to combine with R shiny to create a web dashboard to display results interactively   
-
+* R Shiny app summarising results for research project assessing genetic overlap between blood plasma proteins and Alzheimer’s Disease (AD) using Polygenic Risk Scores (PRS) and Mendelian Randomization (MR)  
 
 To-do
 -------
