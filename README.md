@@ -21,9 +21,9 @@ To-do
 
 - [-] Review data storage approach (e.g. worth investing time to fix Google Drive authentication bug)  
 
-- [-] Create Shiny app template for interactive PRS results (with / without APOE, male / female, age categories)
+- [X] Create Shiny app template for interactive PRS results (with / without APOE, male / female, age categories)
     - [X] Design non repetitive method to prepare and display results across x14 options   
-    - [O] Tidy chart presentation  
+    - [X] Tidy chart presentation  
 
 - [O] Create Shiny app template for MR results 
 
