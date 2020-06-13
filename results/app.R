@@ -269,13 +269,15 @@ server <- function(input, output) {
     
     output$step3_prs <- renderPlot({
         
+        somamer_ids <- c("ANGPT2.13660.76.3","APOB.2797.56.2","APOE.2937.10.2","NPPB.3723.1.2","SERPING1.4479.14.2", "C3.2755.8.2","C4A.C4B.4481.34.2","CLU.4542.24.2","CRP.4337.49.2","FGA.FGB.FGG.4907.56.1","CFH.4159.130.1","CSF3.8952.65.3","HP.3054.3.2","IGFBP2.2570.72.5","IL10.2773.50.2","IL13.3072.4.2","IL3.4717.55.2","CXCL8.3447.64.2","MMP9.2579.17.5","PLG.3710.49.2","RETN.3046.31.1","APCS.2474.54.5","TNC.4155.3.2","TNF.5936.53.3","TF.4162.54.2","VCAM1.2967.8.1")
+        
         apoe <- input$apoe
         group <- input$group
         adjusted_p <- input$adjp
         
-        #update results link
         chart_data <- select_data(apoe, group, step3_prs_res)
-        
+        chart_data <- chart_data %>% group_by(Pheno) %>% filter(R2 == max(R2))
+        chart_data$Protein <- somamer_ids
         chart_data  <- chart_data  %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
         #update index to 2, so keep original phenotype but show protein short code
         names(chart_data)[2] <- "Protein"
