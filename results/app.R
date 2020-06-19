@@ -62,7 +62,33 @@ ui <- fluidPage(
                 condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Meta-analysis PRS' | input.step == 'Step 3: AD PRS to protein'",
                 selectInput("adjp", strong("Adjust p-values with BH"), 
                             choices = c("Yes","No"), selected = "No"),
+            ), 
+            
+            #review switching selection based on input
+            conditionalPanel(
+                condition = "input.step == 'Step 4: Bi-directional MR'",
+                selectInput("exposure", strong("Exposure"), 
+                            choices = c("AD","Proteins"), selected = "Proteins"),
+            ),
+            
+            conditionalPanel(
+                condition = "input.step == 'Step 4: Bi-directional MR' & input.exposure == 'Proteins'",
+                selectInput("threshold", strong("P-value threshold for protein SNP instruments"), 
+                            choices = c("5e-08","5e-06"), selected = "5e-08"),
+            ),
+            
+            conditionalPanel(
+                condition = "input.step == 'Step 4: Bi-directional MR'",
+                selectInput("outcome", strong("Outcome"), 
+                            choices = c("AD","Proteins"), selected = "AD"),
+            ),
+            
+            conditionalPanel(
+                condition = "input.step == 'Step 4: Bi-directional MR'",
+                selectInput("harmonisation", strong("Harmonisation assumption"), 
+                            choices = c("All alleles forward strand","Palindromic SNPs inferred or excluded"), selected = "All alleles forward strand"),
             )
+            
         ),
 
         mainPanel(
@@ -84,6 +110,16 @@ ui <- fluidPage(
            conditionalPanel(
                condition = "input.step == 'Step 3: AD PRS to protein'",
                plotOutput("step3_prs")
+           ), 
+           
+           conditionalPanel(
+               condition = "input.step == 'Step 4: Bi-directional MR'",
+               tableOutput("step4_mr")
+           ), 
+           
+           conditionalPanel(
+               condition = "input.step == 'Step 4: Bi-directional MR' & input.exposure == 'AD' & input.outcome == 'AD' | input.exposure == 'Proteins' & input.outcome == 'Proteins'",
+               textOutput("step4_mr_error")
            )
         )
     )
@@ -219,6 +255,18 @@ server <- function(input, output) {
                              step3_prs_80_with_apoe,
                              step3_prs_80_no_apoe)
     
+    
+    #Step 4 mr results load
+    
+    step4_mr_protein_to_ad_5e08_1 <- read.csv("step4_results/protein_to_ad_mr_5e-08_1.csv", header=T)
+    step4_mr_protein_to_ad_5e08_2 <- read.csv("step4_results/protein_to_ad_mr_5e-08_2.csv", header=T)
+    
+    step4_mr_protein_to_ad_5e06_1 <- read.csv("step4_results/protein_to_ad_mr_5e-06_1.csv", header=T)
+    step4_mr_protein_to_ad_5e06_2 <- read.csv("step4_results/protein_to_ad_mr_5e-06_2.csv", header=T)
+    
+    step4_mr_ad_to_protein_1 <- read.csv("step4_results/ad_to_protein_mr_1.csv", header=T)
+    step4_mr_ad_to_protein_2 <- read.csv("step4_results/ad_to_protein_mr_2.csv", header=T)
+    
     #OUTPUT#
     
     output$h2 <- renderPlot({
@@ -289,6 +337,39 @@ server <- function(input, output) {
             #bonf threshold -> -log10(0.00019) -> 3.721246
             ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.721246, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
         }
+    })
+    
+    output$step4_mr <- renderTable({
+        exposure <- input$exposure
+        outcome <- input$outcome
+        threshold <- input$threshold
+        harmonisation <- input$harmonisation
+        
+        print(paste(exposure, outcome, threshold, harmonisation))
+        
+        #tidy table design
+        if (exposure == "Proteins" & outcome == "AD") {
+            if (threshold == "5e-08" & harmonisation == "All alleles forward strand"){
+                step4_mr_protein_to_ad_5e08_1
+            } else if (threshold == "5e-08" & harmonisation == "Palindromic SNPs inferred or excluded"){
+                step4_mr_protein_to_ad_5e08_2
+            } else if (threshold == "5e-06" & harmonisation == "All alleles forward strand") {
+                step4_mr_protein_to_ad_5e06_1
+            } else {
+                step4_mr_protein_to_ad_5e06_2
+            }
+        } else if (exposure == "AD" & outcome == "Proteins") {
+            if (harmonisation == "All alleles forward strand"){
+                step4_mr_ad_to_protein_1
+            } else {
+                step4_mr_ad_to_protein_2
+            }
+        } else {
+        }
+    })
+    
+    output$step4_mr_error <- renderText({
+        "Can't compare an exposure or outcome against itself, please select again"
     })
 }
 

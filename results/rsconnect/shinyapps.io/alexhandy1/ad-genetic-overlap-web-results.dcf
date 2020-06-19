@@ -5,8 +5,8 @@ account: alexhandy1
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2442093
-bundleId: 3257715
+bundleId: 3265548
 url: https://alexhandy1.shinyapps.io/ad-genetic-overlap-web-results/
-when: 1591890734.80797
+when: 1592061258.3338
 asMultiple: FALSE
 asStatic: FALSE
