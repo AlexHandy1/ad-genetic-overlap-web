@@ -11,6 +11,7 @@ library(shiny)
 library(dplyr)
 library(ggplot2)
 library(htmltools)
+library(DT)
 
 select_data <- function(apoe, group, results){
     if (apoe == "Yes" & group == "All"){ results[[1]] }
@@ -37,90 +38,111 @@ ui <- fluidPage(
 
     sidebarLayout(
         sidebarPanel(
-            selectInput("step", strong("Show results for: "), 
-                        choices = c("Step 1: Protein shortlist","Step 2: Protein PRS to AD","Step 3: AD PRS to protein", "Step 4: Bi-directional MR"), selected = "Step 2: Protein PRS to AD"),
+            selectInput("intro", strong("Show me: "), 
+                        choices = c("Project background","Results"), selected = "Project background"),
             
             conditionalPanel(
-                condition = "input.step == 'Step 2: Protein PRS to AD'",
-                selectInput("chart", strong("Analysis"), 
-                            choices = c("Heritability","Individual sample PRS","Meta-analysis PRS"), selected = "Heritability"),
-            ), 
-            
-            conditionalPanel(
-                condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart != 'Heritability' | input.step == 'Step 3: AD PRS to protein'",
-                selectInput("apoe", strong("Include APOE SNPs in PRS"), 
-                            choices = c("Yes","No"), selected = "Yes"),
-            ), 
-            
-            conditionalPanel(
-                condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart != 'Heritability' | input.step == 'Step 3: AD PRS to protein'",
-                selectInput("group", strong("Sample group"), 
-                            choices = c("All","Males", "Females", "65 and over", "70 and over", "75 and over", "80 and over"), selected = "All"),
-            ), 
-            
-            conditionalPanel(
-                condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Meta-analysis PRS' | input.step == 'Step 3: AD PRS to protein'",
-                selectInput("adjp", strong("Adjust p-values with BH"), 
-                            choices = c("Yes","No"), selected = "No"),
-            ), 
-            
-            #review switching selection based on input
-            conditionalPanel(
-                condition = "input.step == 'Step 4: Bi-directional MR'",
-                selectInput("exposure", strong("Exposure"), 
-                            choices = c("AD","Proteins"), selected = "Proteins"),
-            ),
-            
-            conditionalPanel(
-                condition = "input.step == 'Step 4: Bi-directional MR' & input.exposure == 'Proteins'",
-                selectInput("threshold", strong("P-value threshold for protein SNP instruments"), 
-                            choices = c("5e-08","5e-06"), selected = "5e-08"),
-            ),
-            
-            conditionalPanel(
-                condition = "input.step == 'Step 4: Bi-directional MR'",
-                selectInput("outcome", strong("Outcome"), 
-                            choices = c("AD","Proteins"), selected = "AD"),
-            ),
-            
-            conditionalPanel(
-                condition = "input.step == 'Step 4: Bi-directional MR'",
-                selectInput("harmonisation", strong("Harmonisation assumption"), 
-                            choices = c("All alleles forward strand","Palindromic SNPs inferred or excluded"), selected = "All alleles forward strand"),
-            )
+                condition = "input.intro == 'Results'",
+                conditionalPanel(
+                    condition = "input.intro == 'Results'",
+                    selectInput("step", strong("Show results for: "), 
+                            choices = c("Step 1: Protein shortlist","Step 2: Protein PRS to AD","Step 3: AD PRS to protein", "Step 4: Bi-directional MR"), selected = "Step 1: Protein shortlist"),
+                ),
+                
+                conditionalPanel(
+                    condition = "input.step == 'Step 2: Protein PRS to AD'",
+                    selectInput("chart", strong("Analysis"), 
+                                choices = c("Heritability","Individual sample PRS","Meta-analysis PRS"), selected = "Heritability"),
+                ), 
+                
+                conditionalPanel(
+                    condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart != 'Heritability' | input.step == 'Step 3: AD PRS to protein'",
+                    selectInput("apoe", strong("Include APOE SNPs in PRS"), 
+                                choices = c("Yes","No"), selected = "Yes"),
+                ), 
+                
+                conditionalPanel(
+                    condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart != 'Heritability' | input.step == 'Step 3: AD PRS to protein'",
+                    selectInput("group", strong("Sample group"), 
+                                choices = c("All","Males", "Females", "65 and over", "70 and over", "75 and over", "80 and over"), selected = "All"),
+                ), 
+                
+                conditionalPanel(
+                    condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Meta-analysis PRS' | input.step == 'Step 3: AD PRS to protein'",
+                    selectInput("adjp", strong("Adjust p-values with BH"), 
+                                choices = c("Yes","No"), selected = "No"),
+                ), 
+                
+                conditionalPanel(
+                    condition = "input.step == 'Step 4: Bi-directional MR'",
+                    selectInput("exposure", strong("Exposure"), 
+                                choices = c("AD","Proteins"), selected = "Proteins"),
+                ),
+                
+                conditionalPanel(
+                    condition = "input.step == 'Step 4: Bi-directional MR' & input.exposure == 'Proteins'",
+                    selectInput("threshold", strong("P-value threshold for protein SNP instruments"), 
+                                choices = c("5e-08","5e-06"), selected = "5e-08"),
+                ),
+                
+                conditionalPanel(
+                    condition = "input.step == 'Step 4: Bi-directional MR'",
+                    selectInput("outcome", strong("Outcome"), 
+                                choices = c("AD","Proteins"), selected = "AD"),
+                ),
+                
+                conditionalPanel(
+                    condition = "input.step == 'Step 4: Bi-directional MR'",
+                    selectInput("harmonisation", strong("Harmonisation assumption"), 
+                                choices = c("All alleles forward strand","Palindromic SNPs inferred or excluded"), selected = "All alleles forward strand"),
+                )
+            )    
             
         ),
 
         mainPanel(
-           conditionalPanel(
-               condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Heritability'",
-               plotOutput("h2")
-           ),
-           
-           conditionalPanel(
-               condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Individual sample PRS'",
-               plotOutput("prs_indiv")
-           ),
-           
-           conditionalPanel(
-               condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Meta-analysis PRS'",
-               plotOutput("prs_meta")
-           ),
-           
-           conditionalPanel(
-               condition = "input.step == 'Step 3: AD PRS to protein'",
-               plotOutput("step3_prs")
-           ), 
-           
-           conditionalPanel(
-               condition = "input.step == 'Step 4: Bi-directional MR'",
-               tableOutput("step4_mr")
-           ), 
-           
-           conditionalPanel(
-               condition = "input.step == 'Step 4: Bi-directional MR' & input.exposure == 'AD' & input.outcome == 'AD' | input.exposure == 'Proteins' & input.outcome == 'Proteins'",
-               textOutput("step4_mr_error")
-           )
+            conditionalPanel(
+                condition = "input.intro == 'Project background'",
+                htmlOutput("background")
+            ),
+            
+            conditionalPanel(
+                condition = "input.intro == 'Results'",
+                conditionalPanel(
+                    condition = "input.step == 'Step 1: Protein shortlist'",
+                    DT::dataTableOutput('proteins')
+                ),
+                
+               conditionalPanel(
+                   condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Heritability'",
+                   plotOutput("h2")
+               ),
+               
+               conditionalPanel(
+                   condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Individual sample PRS'",
+                   plotOutput("prs_indiv")
+               ),
+               
+               conditionalPanel(
+                   condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Meta-analysis PRS'",
+                   plotOutput("prs_meta")
+               ),
+               
+               conditionalPanel(
+                   condition = "input.step == 'Step 3: AD PRS to protein'",
+                   plotOutput("step3_prs")
+               ), 
+               
+               conditionalPanel(
+                   condition = "input.step == 'Step 4: Bi-directional MR'",
+                   DT::dataTableOutput("step4_mr_table")
+               ), 
+               
+               conditionalPanel(
+                   condition = "input.step == 'Step 4: Bi-directional MR' & input.exposure == 'AD' & input.outcome == 'AD' | input.exposure == 'Proteins' & input.outcome == 'Proteins'",
+                   textOutput("step4_mr_error")
+               )
+            )
         )
     )
 )
@@ -128,6 +150,10 @@ ui <- fluidPage(
 server <- function(input, output) {
     
     #DATA PREPARATION#
+    
+    #Load step 1 protein shortlist
+    
+    prots <- read.csv("step1_results/protein_shortlist.csv", header=T)
     
     #Load step 2 h2 data
     h2_res <- read.csv("step2_results/protein_h2_results.csv", header=T)
@@ -269,6 +295,15 @@ server <- function(input, output) {
     
     #OUTPUT#
     
+    getBackground<-function() {
+        return(includeHTML("background.html"))
+    }
+    output$background <- renderUI({getBackground()})
+    
+    output$proteins <- DT::renderDataTable(
+        DT::datatable(prots,caption = 'From 175 candidate proteins identified in the literature review, 31 were selected for PRS analysis based on replicability and genetic data availability.', options = list(pageLength=10,columnDefs = list(list(className = 'dt-center', targets = c(1:2)))), rownames = F,colnames = c('Protein', 'Short Code', '# of Studies Replicated In'))
+    )
+    
     output$h2 <- renderPlot({
         ggplot(data = h2_res) + geom_pointrange(mapping = aes(x=reorder(Protein,h2), y=h2, ymin=h2-h2_se, ymax=h2+h2_se)) + geom_hline(yintercept=1, linetype="dashed", color = "red") + geom_hline(yintercept=mean(h2_res$h2), linetype="dashed", color = "blue") + geom_hline(yintercept=0, linetype="dashed", color = "red") + xlab("Protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
     })
@@ -339,33 +374,41 @@ server <- function(input, output) {
         }
     })
     
-    output$step4_mr <- renderTable({
-        exposure <- input$exposure
-        outcome <- input$outcome
-        threshold <- input$threshold
-        harmonisation <- input$harmonisation
-        
-        print(paste(exposure, outcome, threshold, harmonisation))
-        
-        #tidy table design
-        if (exposure == "Proteins" & outcome == "AD") {
-            if (threshold == "5e-08" & harmonisation == "All alleles forward strand"){
-                step4_mr_protein_to_ad_5e08_1
-            } else if (threshold == "5e-08" & harmonisation == "Palindromic SNPs inferred or excluded"){
-                step4_mr_protein_to_ad_5e08_2
-            } else if (threshold == "5e-06" & harmonisation == "All alleles forward strand") {
-                step4_mr_protein_to_ad_5e06_1
+    output$step4_mr_table <- 
+        DT::renderDataTable({
+            exposure <- input$exposure
+            outcome <- input$outcome
+            threshold <- input$threshold
+            harmonisation <- input$harmonisation
+            caption_text <- "6 proteins (Apolipoprotein E (isoform ε3), Apolipoprotein B-100, C-reactive protein, Vitamin D-binding protein, Insulin-like growth factor-binding protein 2 and Angiopoietin-2) were selected for MR analysis."
+            headers <- c("Protein", "N SNPs", "MR Method", "OR", "95% CI Lower", "95% CI Upper", "P-value", "Egger Intercept p-value", "Cochran's Q p-value")
+            headers_decimals <- c("OR", "95% CI Lower", "95% CI Upper", "P-value", "Egger Intercept p-value", "Cochran's Q p-value")
+            
+            #consider adding removal of egger p-value intercept values for non egger p-value methods
+            if (exposure == "Proteins" & outcome == "AD") {
+                if (threshold == "5e-08" & harmonisation == "All alleles forward strand"){
+                    colnames(step4_mr_protein_to_ad_5e08_1) <- headers
+                    DT::datatable(step4_mr_protein_to_ad_5e08_1, caption = caption_text, rownames = F, options = list(pageLength=10,columnDefs = list(list(className = 'dt-center', targets = c(1,4:8))))) %>% DT::formatRound(headers_decimals, 2)
+                } else if (threshold == "5e-08" & harmonisation == "Palindromic SNPs inferred or excluded"){
+                    colnames(step4_mr_protein_to_ad_5e08_2) <- headers
+                    DT::datatable(step4_mr_protein_to_ad_5e08_2, caption = caption_text, rownames = F, options = list(pageLength=10,columnDefs = list(list(className = 'dt-center', targets = c(1,4:8))))) %>% DT::formatRound(headers_decimals, 2)
+                } else if (threshold == "5e-06" & harmonisation == "All alleles forward strand") {
+                    colnames(step4_mr_protein_to_ad_5e06_1) <- headers
+                    DT::datatable(step4_mr_protein_to_ad_5e06_1, caption = caption_text, rownames = F, options = list(pageLength=10,columnDefs = list(list(className = 'dt-center', targets = c(1,4:8))))) %>% DT::formatRound(headers_decimals, 2)
+                } else {
+                    colnames(step4_mr_protein_to_ad_5e06_2) <- headers
+                    DT::datatable(step4_mr_protein_to_ad_5e06_2, caption = caption_text, rownames = F, options = list(pageLength=10,columnDefs = list(list(className = 'dt-center', targets = c(1,4:8))))) %>% DT::formatRound(headers_decimals, 2)
+                }
+            } else if (exposure == "AD" & outcome == "Proteins") {
+                if (harmonisation == "All alleles forward strand"){
+                    colnames(step4_mr_ad_to_protein_1) <- headers
+                    DT::datatable(step4_mr_ad_to_protein_1, caption = caption_text, rownames = F, options = list(pageLength=10,columnDefs = list(list(className = 'dt-center', targets = c(1,4:8))))) %>% DT::formatRound(headers_decimals, 2)
+                } else {
+                    colnames(step4_mr_ad_to_protein_2) <- headers
+                    DT::datatable(step4_mr_ad_to_protein_2, caption = caption_text, rownames = F, options = list(pageLength=10,columnDefs = list(list(className = 'dt-center', targets = c(1,4:8))))) %>% DT::formatRound(headers_decimals, 2)
+                }
             } else {
-                step4_mr_protein_to_ad_5e06_2
             }
-        } else if (exposure == "AD" & outcome == "Proteins") {
-            if (harmonisation == "All alleles forward strand"){
-                step4_mr_ad_to_protein_1
-            } else {
-                step4_mr_ad_to_protein_2
-            }
-        } else {
-        }
     })
     
     output$step4_mr_error <- renderText({
