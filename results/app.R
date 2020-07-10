@@ -20,14 +20,8 @@ select_data <- function(apoe, group, results){
     else if (apoe == "No" & group == "Males") { results[[4]] }
     else if (apoe == "Yes" & group == "Females") { results[[5]] }
     else if (apoe == "No" & group == "Females") { results[[6]] }
-    else if (apoe == "Yes" & group == "65 and over") { results[[7]] }
-    else if (apoe == "No" & group == "65 and over") { results[[8]] }
-    else if (apoe == "Yes" & group == "70 and over") { results[[9]] }
-    else if (apoe == "No" & group == "70 and over") { results[[10]] }
-    else if (apoe == "Yes" & group == "75 and over") { results[[11]] }
-    else if (apoe == "No" & group == "75 and over") { results[[12]] }
-    else if (apoe == "Yes" & group == "80 and over") { results[[13]] }
-    else if (apoe == "No" & group == "80 and over") { results[[14]] }
+    else if (apoe == "Yes" & group == "70 and over") { results[[7]] }
+    else if (apoe == "No" & group == "70 and over") { results[[8]] }
     else { }
 }
 
@@ -64,13 +58,7 @@ ui <- fluidPage(
                 conditionalPanel(
                     condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart != 'Heritability' | input.step == 'Step 3: AD PRS to protein'",
                     selectInput("group", strong("Sample group"), 
-                                choices = c("All","Males", "Females", "65 and over", "70 and over", "75 and over", "80 and over"), selected = "All"),
-                ), 
-                
-                conditionalPanel(
-                    condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Meta-analysis PRS' | input.step == 'Step 3: AD PRS to protein'",
-                    selectInput("adjp", strong("Adjust p-values with BH"), 
-                                choices = c("Yes","No"), selected = "No"),
+                                choices = c("All","Males", "Females", "70 and over"), selected = "All"),
                 ), 
                 
                 conditionalPanel(
@@ -176,17 +164,8 @@ server <- function(input, output) {
     step2_prs_females_with_apoe_res <- read.csv("step2_results/protein_prs_Females_with_apoe_indiv_sample_res.csv", header=T)    
     step2_prs_females_no_apoe_res <- read.csv("step2_results/protein_prs_Females_no_apoe_indiv_sample_res.csv", header=T)    
     
-    step2_prs_65_with_apoe_res <- read.csv("step2_results/protein_prs_65.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
-    step2_prs_65_no_apoe_res <- read.csv("step2_results/protein_prs_65.And.Over_no_apoe_indiv_sample_res.csv", header=T)    
-    
     step2_prs_70_with_apoe_res <- read.csv("step2_results/protein_prs_70.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
     step2_prs_70_no_apoe_res <- read.csv("step2_results/protein_prs_70.And.Over_no_apoe_indiv_sample_res.csv", header=T)    
-    
-    step2_prs_75_with_apoe_res <- read.csv("step2_results/protein_prs_75.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
-    step2_prs_75_no_apoe_res <- read.csv("step2_results/protein_prs_75.And.Over_no_apoe_indiv_sample_res.csv", header=T)  
-    
-    step2_prs_80_with_apoe_res <- read.csv("step2_results/protein_prs_80.And.Over_with_apoe_indiv_sample_res.csv", header=T)    
-    step2_prs_80_no_apoe_res <- read.csv("step2_results/protein_prs_80.And.Over_no_apoe_indiv_sample_res.csv", header=T)
     
     step2_prs_res_indiv <- list(step2_prs_all_with_apoe_res, 
                       step2_prs_all_no_apoe_res, 
@@ -194,14 +173,8 @@ server <- function(input, output) {
                       step2_prs_males_no_apoe_res, 
                       step2_prs_females_with_apoe_res, 
                       step2_prs_females_no_apoe_res,
-                      step2_prs_65_with_apoe_res,
-                      step2_prs_65_no_apoe_res,
                       step2_prs_70_with_apoe_res,
-                      step2_prs_70_no_apoe_res,
-                      step2_prs_75_with_apoe_res,
-                      step2_prs_75_no_apoe_res,
-                      step2_prs_80_with_apoe_res,
-                      step2_prs_80_no_apoe_res)
+                      step2_prs_70_no_apoe_res)
 
     
     #Step 2 prs meta-analysis load
@@ -215,17 +188,8 @@ server <- function(input, output) {
     step2_prs_females_with_apoe_meta <- read.csv("step2_results/protein_prs_Females_with_apoe_meta_analysis_res.csv", header=T)
     step2_prs_females_no_apoe_meta <- read.csv("step2_results/protein_prs_Females_no_apoe_meta_analysis_res.csv", header=T)
     
-    step2_prs_65_with_apoe_meta <- read.csv("step2_results/protein_prs_65.And.Over_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_65_no_apoe_meta <- read.csv("step2_results/protein_prs_65.And.Over_no_apoe_meta_analysis_res.csv", header=T)
-    
     step2_prs_70_with_apoe_meta <- read.csv("step2_results/protein_prs_70.And.Over_with_apoe_meta_analysis_res.csv", header=T)
     step2_prs_70_no_apoe_meta <- read.csv("step2_results/protein_prs_70.And.Over_no_apoe_meta_analysis_res.csv", header=T)
-    
-    step2_prs_75_with_apoe_meta <- read.csv("step2_results/protein_prs_75.And.Over_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_75_no_apoe_meta <- read.csv("step2_results/protein_prs_75.And.Over_no_apoe_meta_analysis_res.csv", header=T)
-    
-    step2_prs_80_with_apoe_meta <- read.csv("step2_results/protein_prs_80.And.Over_with_apoe_meta_analysis_res.csv", header=T)
-    step2_prs_80_no_apoe_meta <- read.csv("step2_results/protein_prs_80.And.Over_no_apoe_meta_analysis_res.csv", header=T)
     
     step2_prs_res_meta <- list(step2_prs_all_with_apoe_meta,
                                step2_prs_all_no_apoe_meta, 
@@ -233,15 +197,8 @@ server <- function(input, output) {
                       step2_prs_males_no_apoe_meta, 
                       step2_prs_females_with_apoe_meta, 
                       step2_prs_females_no_apoe_meta,
-                      step2_prs_65_with_apoe_meta,
-                      step2_prs_65_no_apoe_meta,
                       step2_prs_70_with_apoe_meta,
-                      step2_prs_70_no_apoe_meta,
-                      step2_prs_75_with_apoe_meta,
-                      step2_prs_75_no_apoe_meta,
-                      step2_prs_80_with_apoe_meta,
-                      step2_prs_80_no_apoe_meta)
-    
+                      step2_prs_70_no_apoe_meta)
     
     #Step 3 prs results load
     
@@ -254,17 +211,8 @@ server <- function(input, output) {
     step3_prs_females_with_apoe <- read.csv("step3_results/ad_prs_females_only_with_apoe_res.csv", header=T)
     step3_prs_females_no_apoe <- read.csv("step3_results/ad_prs_females_only_no_apoe_res.csv", header=T)
     
-    step3_prs_65_with_apoe <- read.csv("step3_results/ad_prs_65_and_over_with_apoe_res.csv", header=T)
-    step3_prs_65_no_apoe <- read.csv("step3_results/ad_prs_65_and_over_no_apoe_res.csv", header=T)
-    
     step3_prs_70_with_apoe <- read.csv("step3_results/ad_prs_70_and_over_with_apoe_res.csv", header=T)
     step3_prs_70_no_apoe <- read.csv("step3_results/ad_prs_70_and_over_no_apoe_res.csv", header=T)
-    
-    step3_prs_75_with_apoe <- read.csv("step3_results/ad_prs_75_and_over_with_apoe_res.csv", header=T)
-    step3_prs_75_no_apoe <- read.csv("step3_results/ad_prs_75_and_over_no_apoe_res.csv", header=T)
-    
-    step3_prs_80_with_apoe <- read.csv("step3_results/ad_prs_80_and_over_with_apoe_res.csv", header=T)
-    step3_prs_80_no_apoe <- read.csv("step3_results/ad_prs_80_and_over_no_apoe_res.csv", header=T)
     
     step3_prs_res <- list(step3_prs_all_with_apoe,
                              step3_prs_all_no_apoe, 
@@ -272,14 +220,8 @@ server <- function(input, output) {
                              step3_prs_males_no_apoe, 
                              step3_prs_females_with_apoe, 
                              step3_prs_females_no_apoe,
-                             step3_prs_65_with_apoe,
-                             step3_prs_65_no_apoe,
                              step3_prs_70_with_apoe,
-                             step3_prs_70_no_apoe,
-                             step3_prs_75_with_apoe,
-                             step3_prs_75_no_apoe,
-                             step3_prs_80_with_apoe,
-                             step3_prs_80_no_apoe)
+                             step3_prs_70_no_apoe)
     
     
     #Step 4 mr results load
@@ -329,7 +271,6 @@ server <- function(input, output) {
         
         apoe <- input$apoe
         group <- input$group
-        adjusted_p <- input$adjp
         
         chart_data <- select_data(apoe, group, step2_prs_res_meta)
         
@@ -337,17 +278,10 @@ server <- function(input, output) {
         chart_data  <- chart_data  %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
         names(chart_data)[1] <- "Protein"
         
-        #Present with and without adjusted p values
-        if (adjusted_p == "Yes") {
-            chart_data <- chart_data %>% mutate(adjp = p.adjust(p, method="BH")) %>% mutate(adjp_MinusLog10 = -log10(adjp)) %>% mutate(SignificantAdjP = if_else(adjp < 0.1, "Y","N")) 
-            chart_data <- chart_data %>% group_by(Protein) %>% filter(adjp == min(adjp)) %>% filter(p == min(p))
-            ggplot(chart_data, aes(Protein, adjp_MinusLog10, label=Threshold, fill=SignificantAdjP)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1, linetype="FDR < 0.1"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green4")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE )
-        } else {
-           #bonf threshold -> -log10(0.00017) -> 3.769551
-           chart_data <- chart_data %>% mutate(SignificantBonf = if_else(p < 0.00017, "Y","N")) 
-           chart_data <- chart_data %>% group_by(Protein) %>% filter(p == min(p))  
-           ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.769551, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
-        }
+        #bonf threshold -> -log10(0.00017) -> 3.769551
+        chart_data <- chart_data %>% mutate(SignificantBonf = if_else(p < 0.00017, "Y","N")) 
+        chart_data <- chart_data %>% group_by(Protein) %>% filter(p == min(p))  
+        ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.769551, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
     })
     
     output$step3_prs <- renderPlot({
@@ -356,7 +290,6 @@ server <- function(input, output) {
         
         apoe <- input$apoe
         group <- input$group
-        adjusted_p <- input$adjp
         
         chart_data <- select_data(apoe, group, step3_prs_res)
         chart_data <- chart_data %>% group_by(Pheno) %>% filter(R2 == max(R2))
@@ -365,13 +298,8 @@ server <- function(input, output) {
         #update index to 2, so keep original phenotype but show protein short code
         names(chart_data)[2] <- "Protein"
         
-        #Present with and without adjusted p values
-        if (adjusted_p == "Yes") {
-            ggplot(chart_data, aes(Protein, adjp_MinusLog10, label=Threshold, fill=SignificantAdjP)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1, linetype="FDR < 0.1"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green4")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE )
-        } else {
-            #bonf threshold -> -log10(0.00019) -> 3.721246
-            ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.721246, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
-        }
+        #bonf threshold -> -log10(0.00019) -> 3.721246
+        ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.721246, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
     })
     
     output$step4_mr_table <- 
@@ -380,7 +308,7 @@ server <- function(input, output) {
             outcome <- input$outcome
             threshold <- input$threshold
             harmonisation <- input$harmonisation
-            caption_text <- "6 proteins (Apolipoprotein E (isoform ε3), Apolipoprotein B-100, C-reactive protein, Vitamin D-binding protein, Insulin-like growth factor-binding protein 2 and Angiopoietin-2) were selected for MR analysis."
+            caption_text <- "5 proteins (Apolipoprotein E (isoform ε3), Apolipoprotein B-100, C-reactive protein, Insulin-like growth factor-binding protein 2 and Vitamin D-binding protein) were selected for MR analysis."
             headers <- c("Protein", "N SNPs", "MR Method", "OR", "95% CI Lower", "95% CI Upper", "P-value", "Egger Intercept p-value", "Cochran's Q p-value")
             headers_decimals <- c("OR", "95% CI Lower", "95% CI Upper", "P-value", "Egger Intercept p-value", "Cochran's Q p-value")
             
