@@ -247,13 +247,21 @@ server <- function(input, output) {
     )
     
     output$h2 <- renderPlot({
-        ggplot(data = h2_res) + geom_pointrange(mapping = aes(x=reorder(Protein,h2), y=h2, ymin=h2-h2_se, ymax=h2+h2_se)) + geom_hline(yintercept=1, linetype="dashed", color = "red") + geom_hline(yintercept=mean(h2_res$h2), linetype="dashed", color = "blue") + geom_hline(yintercept=0, linetype="dashed", color = "red") + xlab("Protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0))
+        title_label = "Observed SNP heritability (h2) for proteins" 
+        ggplot(data = h2_res) + geom_pointrange(mapping = aes(x=reorder(Protein,h2), y=h2, ymin=h2-h2_se, ymax=h2+h2_se)) + ggtitle(title_label) + labs(caption = "The blue line is average h2 for all proteins. The red dotted lines represent the bounds for meaningful h2 estimates (0 to 1)") + geom_hline(yintercept=1, linetype="dashed", color = "red") + geom_hline(yintercept=mean(h2_res$h2), linetype="dashed", color = "blue") + geom_hline(yintercept=0, linetype="dashed", color = "red") + xlab("Protein") + theme(plot.title = element_text(face="bold", size=14, margin = margin(t = 5, r = 5, b = 20, l = 5)), axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic"))
     })
     
     output$prs_indiv <- renderPlot({
         
         apoe <- input$apoe
         group <- input$group
+        if (apoe == "Yes"){
+         title_apoe = "with APOE SNPs"   
+        } else {
+         title_apoe = "no APOE SNPs"    
+        }
+        
+        title_label <- paste("Results of logistic regression of individual sample protein PRS (", title_apoe, ") on AD status (",group, ")", sep="")
         
         chart_data <- select_data(apoe, group, step2_prs_res_indiv)
         
@@ -263,7 +271,7 @@ server <- function(input, output) {
         chart_data <- chart_data %>% mutate("Protein_Sample" = paste(Protein, Sample))
         
         #bonf threshold -> -log10(0.00017) -> 3.769551
-        ggplot(chart_data, aes(Protein, P_MinusLog10, fill=Sample)) + geom_bar(stat = "identity", position=position_dodge()) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.769551, linetype="Bonferroni corrected"), color = "green") + theme(axis.text.x=element_text(angle = -90, hjust = 0)) + ylab("-log10 p-value") + xlab("Protein") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue"))))
+        ggplot(chart_data, aes(Protein, P_MinusLog10, fill=Sample)) + geom_bar(stat = "identity", position=position_dodge()) + ggtitle(title_label) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.769551, linetype="Bonferroni corrected"), color = "green") + theme(plot.title = element_text(face="bold", size=14, margin = margin(t = 5, r = 5, b = 20, l = 5)), axis.text.x=element_text(angle = -90, hjust = 0)) + ylab("-log10 p-value") + xlab("Protein") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue"))))
         
     })
     
@@ -272,8 +280,15 @@ server <- function(input, output) {
         apoe <- input$apoe
         group <- input$group
         
-        chart_data <- select_data(apoe, group, step2_prs_res_meta)
+        if (apoe == "Yes"){
+            title_apoe = "with APOE SNPs"   
+        } else {
+            title_apoe = "no APOE SNPs"    
+        }
         
+        title_label <- paste("Meta-analysed results of logistic regression of protein PRS (", title_apoe, ") on AD status (",group, ")", sep="")
+        
+        chart_data <- select_data(apoe, group, step2_prs_res_meta)
         
         chart_data  <- chart_data  %>% mutate("Protein Short Code" = gsub("\\..*","",Protein)) %>% select(1, `Protein Short Code`, everything()) %>% select(-Protein)
         names(chart_data)[1] <- "Protein"
@@ -281,7 +296,7 @@ server <- function(input, output) {
         #bonf threshold -> -log10(0.00017) -> 3.769551
         chart_data <- chart_data %>% mutate(SignificantBonf = if_else(p < 0.00017, "Y","N")) 
         chart_data <- chart_data %>% group_by(Protein) %>% filter(p == min(p))  
-        ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.769551, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
+        ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + ggtitle(title_label) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.769551, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(plot.title = element_text(face="bold", size=14, margin = margin(t = 5, r = 5, b = 20, l = 5)), axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
     })
     
     output$step3_prs <- renderPlot({
@@ -291,6 +306,14 @@ server <- function(input, output) {
         apoe <- input$apoe
         group <- input$group
         
+        if (apoe == "Yes"){
+            title_apoe = "with APOE SNPs"   
+        } else {
+            title_apoe = "no APOE SNPs"    
+        }
+        
+        title_label <- paste("Results of linear regression of AD PRS (", title_apoe, ") on protein levels (",group, ")", sep="")
+        
         chart_data <- select_data(apoe, group, step3_prs_res)
         chart_data <- chart_data %>% group_by(Pheno) %>% filter(R2 == max(R2))
         chart_data$Protein <- somamer_ids
@@ -299,7 +322,7 @@ server <- function(input, output) {
         names(chart_data)[2] <- "Protein"
         
         #bonf threshold -> -log10(0.00019) -> 3.721246
-        ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.721246, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
+        ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + ggtitle(title_label) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.721246, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(plot.title = element_text(face="bold", size=14, margin = margin(t = 5, r = 5, b = 20, l = 5)), axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
     })
     
     output$step4_mr_table <- 
@@ -328,6 +351,8 @@ server <- function(input, output) {
                     DT::datatable(step4_mr_protein_to_ad_5e06_2, caption = caption_text, rownames = F, options = list(pageLength=10,columnDefs = list(list(className = 'dt-center', targets = c(1,4:8))))) %>% DT::formatRound(headers_decimals, 2)
                 }
             } else if (exposure == "AD" & outcome == "Proteins") {
+                headers <- c("Protein", "N SNPs", "MR Method", "Beta", "95% CI Lower", "95% CI Upper", "P-value", "Egger Intercept p-value", "Cochran's Q p-value")
+                headers_decimals <- c("Beta", "95% CI Lower", "95% CI Upper", "P-value", "Egger Intercept p-value", "Cochran's Q p-value")
                 if (harmonisation == "All alleles forward strand"){
                     colnames(step4_mr_ad_to_protein_1) <- headers
                     DT::datatable(step4_mr_ad_to_protein_1, caption = caption_text, rownames = F, options = list(pageLength=10,columnDefs = list(list(className = 'dt-center', targets = c(1,4:8))))) %>% DT::formatRound(headers_decimals, 2)

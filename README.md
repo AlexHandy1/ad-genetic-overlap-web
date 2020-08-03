@@ -18,16 +18,18 @@ To-do
 
 - [X] Create simplified chart mock-ups from existing code and results in R markdown
 
-- [-] Review data storage approach (e.g. worth investing time to fix Google Drive authentication bug)  
+- [X] Review data storage approach (e.g. worth investing time to fix Google Drive authentication bug)  
 
 - [X] Create Shiny app template for interactive PRS results (with / without APOE, male / female, age categories)
     - [X] Design non repetitive method to prepare and display results across x14 options   
     - [X] Tidy chart presentation  
 
-- [O] Create Shiny app template for MR results 
+- [X] Create Shiny app template for MR results 
 
-- [X] Publish to web to provide shareable URL
+- [X] Publish to web to provide shareable URL  
 
-- [O] Add functionality to support packaging into academic poster
+- [O] Complete further design changes (e.g. responsive titles)
+
+- [O] Write blog post
 
 ```
