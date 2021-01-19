@@ -122,7 +122,11 @@ ui <- fluidPage(
                
                conditionalPanel(
                    condition = "input.step == 'Step 3: AD PRS to protein'",
-                   plotOutput("step3_prs")
+                   plotOutput("step3_prs"),
+                   br(),
+                   br(),
+                   br(),
+                   DT::dataTableOutput("step3_prs_table")
                ), 
                
                conditionalPanel(
@@ -336,7 +340,7 @@ server <- function(input, output) {
     })
     
     output$step3_prs <- renderPlot({
-        
+        #NOT IN ALPHABETICAL ORDER, IN ORDER THAT ANALYSED IN INPUT FILE
         somamer_ids <- c("ANGPT2.13660.76.3","APOB.2797.56.2","APOE.2937.10.2","NPPB.3723.1.2","SERPING1.4479.14.2", "C3.2755.8.2","C4A.C4B.4481.34.2","CLU.4542.24.2","CRP.4337.49.2","FGA.FGB.FGG.4907.56.1","CFH.4159.130.1","CSF3.8952.65.3","HP.3054.3.2","IGFBP2.2570.72.5","IL10.2773.50.2","IL13.3072.4.2","IL3.4717.55.2","CXCL8.3447.64.2","MMP9.2579.17.5","PLG.3710.49.2","RETN.3046.31.1","APCS.2474.54.5","TNC.4155.3.2","TNF.5936.53.3","TF.4162.54.2","VCAM1.2967.8.1")
         
         apoe <- input$apoe
@@ -359,6 +363,48 @@ server <- function(input, output) {
         
         #bonf threshold -> -log10(0.00019) -> 3.721246
         ggplot(chart_data, aes(Protein, P_MinusLog10, label=Threshold, fill=SignificantBonf)) + geom_bar(stat = "identity") + ggtitle(title_label) + geom_hline(aes(yintercept=1.3, linetype="nominal p < 0.05"), color = "blue") + geom_hline(aes(yintercept=3.721246, linetype="Bonferroni corrected"), color = "green") + expand_limits(y = c(0, 2.5)) + geom_text(vjust=-0.5, size=2) + ylab("-log10 p-value") + scale_linetype_manual(name = "Significance", values = c(2, 2), guide = guide_legend(override.aes = list(color = c("green", "blue")))) + labs(caption = "P-value threshold for most significant PRS model displayed above bar for each protein") + theme(plot.title = element_text(face="bold", size=14, margin = margin(t = 5, r = 5, b = 20, l = 5)), axis.text.x=element_text(angle = -90, hjust = 0), plot.caption = element_text(hjust = 0, face= "italic")) + scale_fill_manual( values = c( "Y"="green4", "N"="gray" ), guide = FALSE) 
+    })
+    
+    output$step3_prs_table <- DT::renderDataTable({
+        #NOT IN ALPHABETICAL ORDER, IN ORDER THAT ANALYSED IN INPUT FILE
+        somamer_id_codes <- c("ANGPT2","APOB","APOE","NPPB","SERPING1", "C3","C4A","CLU","CRP","FGA","CFH","CSF3","HP","IGFBP2","IL10","IL13","IL3","CXCL8","MMP9","PLG","RETN","APCS","TNC","TNF","TF","VCAM1")
+        apoe <- input$apoe
+        group <- input$group
+        chart_data <- select_data(apoe, group, step3_prs_res)
+        
+        names(chart_data)[1] <- "Protein"
+        chart_data <- chart_data %>% group_by(Protein) %>% filter(R2 == max(R2))
+        chart_data$Protein <- somamer_id_codes
+        
+        #calculate 95% confidence intervals
+        
+        ci_lower<-c()
+        ci_upper<-c()
+        
+        for (i in 1:nrow(chart_data)){
+            ci_lower[i] <- chart_data[i,5]-1.96*chart_data[i,6]
+        }
+        
+        for (i in 1:nrow(chart_data)){
+            ci_upper[i] <- chart_data[i,5]+1.96*chart_data[i,6]
+        }
+        
+        chart_data$ci_lower <- ci_lower
+        chart_data$ci_upper <- ci_upper
+        
+        target_headers <- c("Protein", "Threshold", "Num_SNP", "Coefficient", "ci_lower", "ci_upper", "R2", "P")
+        chart_data <- chart_data %>% select(target_headers)
+        
+        clean_headers <- c("Protein", "PRS p-value threshold", "SNPs (N)", "Beta", "95% CI Lower", "95% CI Upper", "R2", "P-value")
+        colnames(chart_data) <- clean_headers
+        
+        headers_decimals <- c("PRS p-value threshold", "Beta", "95% CI Lower", "95% CI Upper", "R2", "P-value") 
+        
+        #sort alphabetically on protein names to align with chart
+        chart_data <- chart_data[order(chart_data$Protein), ]
+        
+        #consider further work on formatting (mismatched between step2 and step3 tables, initial adding of option filtered out results)
+        DT::datatable(chart_data, rownames = F)
     })
     
     output$step4_mr_table <- 
