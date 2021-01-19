@@ -114,6 +114,9 @@ ui <- fluidPage(
                conditionalPanel(
                    condition = "input.step == 'Step 2: Protein PRS to AD' & input.chart == 'Meta-analysis PRS'",
                    plotOutput("prs_meta"),
+                   br(),
+                   br(),
+                   br(),
                    DT::dataTableOutput("prs_meta_table")
                ),
                
@@ -310,19 +313,26 @@ server <- function(input, output) {
         
         chart_data <- chart_data %>% group_by(Protein) %>% filter(p == min(p)) 
         
-        target_headers <- c("Protein", "Threshold", "nSNP", "beta", "ci_lower", "ci_upper", "p")
+        target_headers <- c("Protein", "Threshold", "nSNP", "beta", "ci_lower", "ci_upper", "r2", "p")
         chart_data <- chart_data %>% select(target_headers)
         
-        clean_headers <- c("Protein", "PRS p-value threshold", "SNPs (N)", "Beta", "95% CI Lower", "95% CI Upper", "P-value")
+        clean_headers <- c("Protein", "PRS p-value threshold", "SNPs (N)", "Beta", "95% CI Lower", "95% CI Upper", "R2", "P-value")
         colnames(chart_data) <- clean_headers
         
+        headers_decimals <- c("PRS p-value threshold", "Beta", "95% CI Lower", "95% CI Upper", "R2", "P-value") 
+        
+        #Pre-format numbers in chart_data
+        #Decision to leave numbers long form as scientific notation prevents accurate sorting
+        # formatScientific <- function(x){
+        #     formatC(num, format = "e", digits = 2)
+        # }
+        #chart_data[headers_decimals] <- lapply(chart_data[headers_decimals], formatScientific)
+        
         #TO-DO
-            #Format numbers
-            #Add space above table
             #Repeat for AD PRS
             #Publish to web (within R shiny)
         
-        DT::datatable(chart_data,caption = 'Title (review how add space from upper chart)', rownames = F)
+        DT::datatable(chart_data, rownames = F)
     })
     
     output$step3_prs <- renderPlot({
