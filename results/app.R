@@ -129,9 +129,14 @@ ui <- fluidPage(
                    DT::dataTableOutput("step3_prs_table")
                ), 
                
+               #CONSIDER SWITCHING ORDER AND TIDYING CHART PRESENTATION
                conditionalPanel(
                    condition = "input.step == 'Step 4: Bi-directional MR'",
-                   DT::dataTableOutput("step4_mr_table")
+                   DT::dataTableOutput("step4_mr_table"),
+                   br(),
+                   br(),
+                   br(),
+                   imageOutput("forest_plot")
                ), 
                
                conditionalPanel(
@@ -332,10 +337,6 @@ server <- function(input, output) {
         # }
         #chart_data[headers_decimals] <- lapply(chart_data[headers_decimals], formatScientific)
         
-        #TO-DO
-            #Repeat for AD PRS
-            #Publish to web (within R shiny)
-        
         DT::datatable(chart_data, rownames = F)
     })
     
@@ -445,6 +446,39 @@ server <- function(input, output) {
             } else {
             }
     })
+    
+    output$forest_plot <- renderImage({
+        exposure <- input$exposure
+        outcome <- input$outcome
+        threshold <- input$threshold
+        harmonisation <- input$harmonisation
+        
+        if (exposure == "Proteins" & outcome == "AD") {
+            if (threshold == "5e-08" & harmonisation == "All alleles forward strand"){
+                image_file = "www/protein_to_ad_mr_forest_5e-08_1.png"
+            } else if (threshold == "5e-08" & harmonisation == "Palindromic SNPs inferred or excluded"){
+                image_file = "www/protein_to_ad_mr_forest_5e-08_2.png"
+            } else if (threshold == "5e-06" & harmonisation == "All alleles forward strand") {
+                image_file = "www/protein_to_ad_mr_forest_5e-06_1.png"
+            } else {
+                image_file = "www/protein_to_ad_mr_forest_5e-06_2.png"
+            }
+        } else if (exposure == "AD" & outcome == "Proteins") {
+            if (harmonisation == "All alleles forward strand"){
+                image_file = "www/ad_to_protein_mr_forest_1.png"
+            } else {
+                image_file = "www/ad_to_protein_mr_forest_2.png"
+            }
+        } else {
+        }
+        
+        list(src = image_file,
+             contentType = 'image/png',
+             width = 700,
+             height = 800,
+             alt = "This is a forest plot")
+        
+    }, deleteFile = FALSE)
     
     output$step4_mr_error <- renderText({
         "Can't compare an exposure or outcome against itself, please select again"
